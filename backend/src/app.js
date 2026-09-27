@@ -12,6 +12,7 @@ const foodItemRoutes = require("./routes/foodItemRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const addressRoutes = require("./routes/addressRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const couponRoutes = require("./routes/couponRoutes");
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use("/api/food-items", foodItemRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/coupons", couponRoutes);
 // Health check
 app.get("/api/health", (req, res) => {
   res.status(200).json({

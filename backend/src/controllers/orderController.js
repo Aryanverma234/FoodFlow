@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Address = require("../models/Address");
 const Restaurant = require("../models/Restaurant");
+const Coupon = require("../models/Coupon");
 
 const generateOrderNumber = () => {
 const timestamp = Date.now().toString().slice(-8);
@@ -15,6 +16,7 @@ try {
 const {
 addressId,
 paymentMethod = "COD",
+ couponCode,
 } = req.body;
 
 if (!addressId) {
@@ -60,6 +62,71 @@ const restaurant = await Restaurant.findOne({
   isApproved: true,
   isActive: true,
 });
+let coupon = null;
+let couponDiscount = 0;
+
+if (couponCode) {
+  coupon = await Coupon.findOne({
+    code: couponCode.trim().toUpperCase(),
+    isActive: true,
+    startDate: { $lte: new Date() },
+    expiryDate: { $gte: new Date() },
+  });
+
+  if (!coupon) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or expired coupon",
+    });
+  }
+
+  if (
+    coupon.restaurant &&
+    coupon.restaurant.toString() !== cart.restaurant.toString()
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "This coupon is not valid for this restaurant",
+    });
+  }
+
+  if (cart.subtotal < coupon.minimumOrderAmount) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Minimum order amount for this coupon is " +
+        coupon.minimumOrderAmount,
+    });
+  }
+
+  if (
+    coupon.usageLimit !== null &&
+    coupon.usedCount >= coupon.usageLimit
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Coupon usage limit has been reached",
+    });
+  }
+
+  if (coupon.discountType === "PERCENTAGE") {
+    couponDiscount =
+      (cart.subtotal * coupon.discountValue) / 100;
+
+    if (
+      coupon.maximumDiscount !== null &&
+      couponDiscount > coupon.maximumDiscount
+    ) {
+      couponDiscount = coupon.maximumDiscount;
+    }
+  } else {
+    couponDiscount = coupon.discountValue;
+  }
+
+  if (couponDiscount > cart.subtotal) {
+    couponDiscount = cart.subtotal;
+  }
+}
 
 if (!restaurant) {
   return res.status(400).json({
@@ -97,8 +164,11 @@ const order = await Order.create({
   deliveryAddress,
   subtotal: cart.subtotal,
   deliveryFee: cart.deliveryFee,
-  discount: cart.discount,
-  total: cart.total,
+ discount: cart.discount + couponDiscount,
+total:
+  cart.subtotal +
+  cart.deliveryFee -
+  (cart.discount + couponDiscount),
   paymentMethod,
   paymentStatus: "PENDING",
   orderStatus: "PLACED",
@@ -114,7 +184,10 @@ cart.discount = 0;
 cart.total = 0;
 
 await cart.save();
-
+if (coupon) {
+  coupon.usedCount += 1;
+  await coupon.save();
+}
 const populatedOrder = await Order.findById(order._id)
   .populate(
     "restaurant",
