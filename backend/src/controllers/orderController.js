@@ -3,7 +3,9 @@ const Cart = require("../models/Cart");
 const Address = require("../models/Address");
 const Restaurant = require("../models/Restaurant");
 const Coupon = require("../models/Coupon");
-
+const {
+  createOrderNotification,
+} = require("../services/notificationService");
 const generateOrderNumber = () => {
 const timestamp = Date.now().toString().slice(-8);
 const random = Math.floor(1000 + Math.random() * 9000);
@@ -461,6 +463,13 @@ const updateOrderStatus = async (req, res) => {
     order.orderStatus = orderStatus;
 
     await order.save();
+
+    await createOrderNotification({
+  userId: order.user._id || order.user,
+  orderId: order._id,
+  orderNumber: order.orderNumber,
+  orderStatus: order.orderStatus,
+});
 
     const updatedOrder = await Order.findById(order._id)
       .populate("user", "name email phone")
