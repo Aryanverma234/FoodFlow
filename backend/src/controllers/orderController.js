@@ -1,4 +1,5 @@
 const Order = require("../models/Order");
+const Payment = require("../models/Payment");
 const Cart = require("../models/Cart");
 const Address = require("../models/Address");
 const Restaurant = require("../models/Restaurant");
@@ -186,6 +187,14 @@ cart.discount = 0;
 cart.total = 0;
 
 await cart.save();
+const payment = await Payment.create({
+  order: order._id,
+  user: req.user.userId,
+  amount: order.total,
+  currency: "INR",
+  method: paymentMethod === "COD" ? "COD" : "RAZORPAY",
+  status: "PENDING",
+});
 if (coupon) {
   coupon.usedCount += 1;
   await coupon.save();
