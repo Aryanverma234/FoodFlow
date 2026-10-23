@@ -55,10 +55,9 @@ const paymentSchema = new mongoose.Schema(
     },
 
     providerPaymentId: {
-      type: String,
-      default: null,
-      sparse: true,
-    },
+     type: String,
+     default: null,
+  },
 
     providerSignature: {
       type: String,
