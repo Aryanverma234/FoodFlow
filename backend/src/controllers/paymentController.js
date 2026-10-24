@@ -1,3 +1,4 @@
+
 const Payment = require("../models/Payment");
 const Order = require("../models/Order");
 const Razorpay = require("razorpay");
@@ -46,9 +47,10 @@ const createRazorpayOrder = async (req, res) => {
       });
     }
 
+    // Allow retry for PENDING and FAILED payments only.
     if (
       order.orderStatus === "CANCELLED" ||
-      order.paymentStatus !== "PENDING"
+      !["PENDING", "FAILED"].includes(order.paymentStatus)
     ) {
       return res.status(400).json({
         success: false,
@@ -61,10 +63,13 @@ const createRazorpayOrder = async (req, res) => {
       user: req.user.userId,
     });
 
-    if (!payment || payment.status !== "PENDING") {
+    if (
+      !payment ||
+      !["PENDING", "FAILED"].includes(payment.status)
+    ) {
       return res.status(400).json({
         success: false,
-        message: "A pending payment record is required",
+        message: "A pending or failed payment record is required",
       });
     }
 
@@ -83,8 +88,18 @@ const createRazorpayOrder = async (req, res) => {
       },
     });
 
+    // Reset failed payment for a fresh Razorpay attempt.
+    payment.status = "PENDING";
     payment.providerOrderId = razorpayOrder.id;
+    payment.providerPaymentId = null;
+    payment.providerSignature = null;
+    payment.failureReason = "";
+    payment.paidAt = null;
+
+    order.paymentStatus = "PENDING";
+
     await payment.save();
+    await order.save();
 
     return res.status(201).json({
       success: true,
@@ -96,7 +111,7 @@ const createRazorpayOrder = async (req, res) => {
       orderId: order._id,
     });
   } catch (error) {
-    console.error("Create Razorpay Order Error:", error);
+    console.error("Create Razorpay Order Error:", error.message);
 
     return res.status(500).json({
       success: false,
@@ -114,7 +129,6 @@ const verifyRazorpayPayment = async (req, res) => {
       razorpay_signature,
     } = req.body;
 
-    // Validate required fields
     if (
       typeof orderId !== "string" ||
       !/^[0-9a-fA-F]{24}$/.test(orderId) ||
@@ -138,7 +152,6 @@ const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // Find only the logged-in user's order
     const order = await Order.findOne({
       _id: orderId,
       user: req.user.userId,
@@ -173,7 +186,6 @@ const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // Prevent replaying a successful payment verification
     if (
       payment.status === "SUCCESS" &&
       order.paymentStatus === "PAID" &&
@@ -198,7 +210,6 @@ const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // Use the provider order ID saved on our server.
     if (
       !payment.providerOrderId ||
       payment.providerOrderId !== razorpay_order_id
@@ -209,7 +220,6 @@ const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // Verify Razorpay's HMAC SHA-256 signature.
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${payment.providerOrderId}|${razorpay_payment_id}`)
@@ -227,7 +237,6 @@ const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // Save payment and order together in a MongoDB transaction.
     const session = await Order.startSession();
 
     try {
@@ -282,7 +291,6 @@ const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // Do not log secrets, signatures, or full payment payloads.
     console.error("Verify Razorpay Payment Error:", error.message);
 
     return res.status(500).json({
@@ -401,7 +409,7 @@ const simulateMockPayment = async (req, res) => {
       });
     }
 
-    console.error("Mock Payment Error:", error);
+    console.error("Mock Payment Error:", error.message);
 
     return res.status(500).json({
       success: false,
@@ -427,7 +435,7 @@ const getMyPayments = async (req, res) => {
       payments,
     });
   } catch (error) {
-    console.error("Get My Payments Error:", error);
+    console.error("Get My Payments Error:", error.message);
 
     return res.status(500).json({
       success: false,
@@ -470,7 +478,7 @@ const getPaymentByOrder = async (req, res) => {
       payment,
     });
   } catch (error) {
-    console.error("Get Payment By Order Error:", error);
+    console.error("Get Payment By Order Error:", error.message);
 
     return res.status(500).json({
       success: false,
