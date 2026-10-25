@@ -1,6 +1,7 @@
-/* ==============================
-   FoodFlow — Global Styles
-================================ */
+
+/* =========================================
+   FOODFLOW - GLOBAL STYLES
+========================================= */
 
 :root {
   font-family: Inter, Arial, sans-serif;
@@ -12,12 +13,17 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  min-height: 100vh;
-}
-
 * {
   box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+#root {
+  min-height: 100vh;
 }
 
 body {
@@ -28,7 +34,9 @@ body {
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
 }
 
@@ -42,9 +50,96 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
-/* ==============================
-   Main Layout
-================================ */
+/* =========================================
+   PREMIUM NAVBAR
+========================================= */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  min-height: 76px;
+  padding: 0 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid #e9eee9;
+  box-shadow: 0 3px 18px rgba(20, 50, 25, 0.055);
+  backdrop-filter: blur(12px);
+}
+
+.navbar .logo {
+  flex-shrink: 0;
+  color: #16864a;
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: -1.2px;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 27px;
+}
+
+.nav-links a {
+  position: relative;
+  padding: 9px 0;
+  color: #424b43;
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: #16864a;
+}
+
+.nav-links a::after {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  left: 0;
+  height: 2px;
+  border-radius: 5px;
+  background: #16864a;
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+
+.nav-links a:hover::after {
+  transform: scaleX(1);
+}
+
+.nav-links button {
+  padding: 10px 19px;
+  border: none;
+  border-radius: 9px;
+  background: #16864a;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.nav-links button:hover {
+  background: #106638;
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   MAIN LAYOUT
+========================================= */
 
 .foodflow-container {
   min-height: 100vh;
@@ -66,9 +161,9 @@ input:focus-visible {
     linear-gradient(135deg, #f7faf7, #edf5ee);
 }
 
-/* ==============================
-   Main Card
-================================ */
+/* =========================================
+   MAIN CARD
+========================================= */
 
 .foodflow-card {
   width: 100%;
@@ -98,9 +193,9 @@ input:focus-visible {
   letter-spacing: 0.2px;
 }
 
-/* ==============================
-   Login & Payment Form
-================================ */
+/* =========================================
+   LOGIN & PAYMENT FORM
+========================================= */
 
 .foodflow-form {
   display: flex;
@@ -134,10 +229,7 @@ input:focus-visible {
   outline: none;
   background: #ffffff;
   color: #17251b;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s,
-    background 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
 .foodflow-form input::placeholder {
@@ -162,10 +254,7 @@ input:focus-visible {
   color: #ffffff;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    background 0.2s,
-    transform 0.2s,
-    box-shadow 0.2s;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .foodflow-form button {
@@ -175,4 +264,90 @@ input:focus-visible {
 
 .foodflow-form button:hover:not(:disabled),
 .orders-section button:hover:not(:disabled),
-.order-card > button:
+.order-card > button:hover:not(:disabled),
+.status-message button:hover:not(:disabled) {
+  background: #116b35;
+  box-shadow: 0 5px 14px rgba(22, 134, 74, 0.15);
+  transform: translateY(-1px);
+}
+
+.foodflow-form button:disabled,
+.orders-section button:disabled,
+.order-card > button:disabled,
+.status-message button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   RESPONSIVE NAVBAR
+========================================= */
+
+@media (max-width: 850px) {
+  .navbar {
+    padding: 14px 22px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+  }
+}
+
+@media (max-width: 520px) {
+  .navbar {
+    min-height: auto;
+    padding: 13px 15px;
+  }
+
+  .navbar .logo {
+    font-size: 23px;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 7px 16px;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+  }
+
+  .nav-links button {
+    padding: 8px 13px;
+    font-size: 12px;
+  }
+
+  .foodflow-container {
+    padding: 22px 12px;
+  }
+
+  .foodflow-card {
+    padding: 22px 16px;
+    border-radius: 16px;
+  }
+
+  .foodflow-card > h1 {
+    font-size: 29px;
+  }
+}
