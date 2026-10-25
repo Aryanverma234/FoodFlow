@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import "./Address.css";
 
 const API_URL = "http://localhost:5000/api";
 
@@ -146,57 +147,95 @@ function Address() {
     setShowForm(false);
   };
 
-  if (loading) return <h2>Loading addresses...</h2>;
+  if (loading) {
+    return <div className="address-loading">Loading addresses...</div>;
+  }
 
   return (
-    <div style={{ maxWidth: "900px", margin: "30px auto", padding: "20px" }}>
-      <h1>My Addresses 📍</h1>
+    <main className="address-page">
+      <div className="address-header">
+        <div>
+          <h1>My Addresses</h1>
+          <p>Manage your saved delivery locations</p>
+        </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {message && <p style={{ color: "green" }}>{message}</p>}
-
-      <button onClick={() => {
-        if (showForm) cancelForm();
-        else {
-          setForm(initialForm);
-          setEditingId(null);
-          setShowForm(true);
-        }
-      }}>
-        {showForm ? "Cancel" : "+ Add New Address"}
-      </button>
-
-      {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "grid",
-            gap: "12px",
-            marginTop: "20px",
-            padding: "20px",
-            border: "1px solid #ddd",
-            borderRadius: "12px",
+        <button
+          className="address-add-btn"
+          onClick={() => {
+            if (showForm) {
+              cancelForm();
+            } else {
+              setForm(initialForm);
+              setEditingId(null);
+              setShowForm(true);
+              setError("");
+              setMessage("");
+            }
           }}
         >
+          {showForm ? "Cancel" : "+ Add New Address"}
+        </button>
+      </div>
+
+      {error && <div className="address-alert error">{error}</div>}
+      {message && <div className="address-alert success">{message}</div>}
+
+      {showForm && (
+        <form className="address-form" onSubmit={handleSubmit}>
           <h2>{editingId ? "Edit Address" : "Add New Address"}</h2>
 
-          <label>Address Type</label>
-          <select name="label" value={form.label} onChange={handleChange}>
-            <option value="Home">Home</option>
-            <option value="Work">Work</option>
-            <option value="Other">Other</option>
-          </select>
+          <div className="address-form-grid">
+            <div className="address-field">
+              <label>Address Type</label>
+              <select name="label" value={form.label} onChange={handleChange}>
+                <option value="Home">Home</option>
+                <option value="Work">Work</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
 
-          <input name="fullName" placeholder="Full Name" value={form.fullName} onChange={handleChange} required />
-          <input name="phone" type="tel" placeholder="Phone Number" value={form.phone} onChange={handleChange} required />
-          <input name="addressLine1" placeholder="House No. / Street / Area" value={form.addressLine1} onChange={handleChange} required />
-          <input name="addressLine2" placeholder="Address Line 2 (Optional)" value={form.addressLine2} onChange={handleChange} />
-          <input name="landmark" placeholder="Landmark (Optional)" value={form.landmark} onChange={handleChange} />
-          <input name="city" placeholder="City" value={form.city} onChange={handleChange} required />
-          <input name="state" placeholder="State" value={form.state} onChange={handleChange} required />
-          <input name="pincode" placeholder="Pincode" value={form.pincode} onChange={handleChange} required />
+            <div className="address-field">
+              <label>Full Name</label>
+              <input name="fullName" placeholder="Enter full name" value={form.fullName} onChange={handleChange} required />
+            </div>
 
-          <label>
+            <div className="address-field">
+              <label>Phone Number</label>
+              <input name="phone" type="tel" placeholder="Enter phone number" value={form.phone} onChange={handleChange} required />
+            </div>
+
+            <div className="address-field">
+              <label>House No. / Street / Area</label>
+              <input name="addressLine1" placeholder="Enter address" value={form.addressLine1} onChange={handleChange} required />
+            </div>
+
+            <div className="address-field">
+              <label>Address Line 2</label>
+              <input name="addressLine2" placeholder="Optional" value={form.addressLine2} onChange={handleChange} />
+            </div>
+
+            <div className="address-field">
+              <label>Landmark</label>
+              <input name="landmark" placeholder="Nearby landmark" value={form.landmark} onChange={handleChange} />
+            </div>
+
+            <div className="address-field">
+              <label>City</label>
+              <input name="city" placeholder="City" value={form.city} onChange={handleChange} required />
+            </div>
+
+            <div className="address-field">
+              <label>State</label>
+              <input name="state" placeholder="State" value={form.state} onChange={handleChange} required />
+            </div>
+
+            <div className="address-field">
+              <label>Pincode</label>
+              <input name="pincode" placeholder="Pincode" value={form.pincode} onChange={handleChange} required />
+            </div>
+          </div>
+
+          <label className="address-default-check">
             <input
               type="checkbox"
               name="isDefault"
@@ -206,55 +245,74 @@ function Address() {
             Set as default address
           </label>
 
-          <button type="submit" disabled={saving}>
-            {saving ? "Saving..." : editingId ? "Update Address" : "Save Address"}
-          </button>
-
-          <button type="button" onClick={cancelForm}>
-            Cancel
-          </button>
+          <div className="address-form-actions">
+            <button type="submit" disabled={saving} className="address-save-btn">
+              {saving ? "Saving..." : editingId ? "Update Address" : "Save Address"}
+            </button>
+            <button type="button" onClick={cancelForm} className="address-cancel-btn">
+              Cancel
+            </button>
+          </div>
         </form>
       )}
 
-      <h2 style={{ marginTop: "30px" }}>Saved Addresses</h2>
+      <section className="saved-address-section">
+        <div className="saved-address-heading">
+          <h2>Saved Addresses</h2>
+          <span>{addresses.length} saved</span>
+        </div>
 
-      {addresses.length === 0 ? (
-        <p>Abhi koi saved address nahi hai.</p>
-      ) : (
-        addresses.map((address) => (
-          <div
-            key={address._id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: "12px",
-              padding: "18px",
-              marginTop: "15px",
-            }}
-          >
-            <h3>{address.label}</h3>
-            <p>{address.fullName}</p>
-            <p>{address.addressLine1}</p>
-            {address.addressLine2 && <p>{address.addressLine2}</p>}
-            {address.landmark && <p>Landmark: {address.landmark}</p>}
-            <p>{address.city}, {address.state} - {address.pincode}</p>
-            <p>Phone: {address.phone}</p>
-
-            {address.isDefault ? (
-              <strong style={{ color: "green" }}>✓ Default Address</strong>
-            ) : (
-              <button onClick={() => handleSetDefault(address._id)}>
-                Set as Default
-              </button>
-            )}
-
-            <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
-              <button onClick={() => handleEdit(address)}>Edit</button>
-              <button onClick={() => handleDelete(address._id)}>Delete</button>
-            </div>
+        {addresses.length === 0 ? (
+          <div className="address-empty">
+            <span>📍</span>
+            <h3>No saved addresses</h3>
+            <p>Add an address to make your next order easier.</p>
           </div>
-        ))
-      )}
-    </div>
+        ) : (
+          <div className="saved-address-grid">
+            {addresses.map((address) => (
+              <article className="saved-address-card" key={address._id}>
+                <div className="saved-address-top">
+                  <div className="saved-address-label">
+                    <span>📍</span>
+                    <h3>{address.label || "Home"}</h3>
+                  </div>
+
+                  {address.isDefault && (
+                    <span className="default-badge">✓ Default Address</span>
+                  )}
+                </div>
+
+                <div className="saved-address-details">
+                  <strong>{address.fullName}</strong>
+                  <p>{address.addressLine1}</p>
+                  {address.addressLine2 && <p>{address.addressLine2}</p>}
+                  {address.landmark && <p>Landmark: {address.landmark}</p>}
+                  <p>{address.city}, {address.state} - {address.pincode}</p>
+                  <p className="address-phone">☎ {address.phone}</p>
+                </div>
+
+                <div className="saved-address-actions">
+                  {!address.isDefault && (
+                    <button
+                      className="set-default-btn"
+                      onClick={() => handleSetDefault(address._id)}
+                    >
+                      Set as Default
+                    </button>
+                  )}
+
+                  <div className="address-card-buttons">
+                    <button onClick={() => handleEdit(address)}>Edit</button>
+                    <button onClick={() => handleDelete(address._id)}>Delete</button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
   );
 }
 

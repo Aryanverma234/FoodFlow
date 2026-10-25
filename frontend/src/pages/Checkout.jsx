@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import "./Checkout.css";
 
 const API_URL = "http://localhost:5000/api";
 
@@ -101,130 +102,263 @@ function Checkout() {
     }
   };
 
+  const selectedAddressData = addresses.find(
+    (address) => address._id === selectedAddress
+  );
+
   return (
-    <div className="restaurants-page">
-      <h1>Checkout 🛍️</h1>
+    <main className="checkout-page">
+      <div className="checkout-heading">
+        <div>
+          <span className="checkout-eyebrow">FOODFLOW CHECKOUT</span>
+          <h1>Complete your order</h1>
+          <p>Just a few steps away from delicious food.</p>
+        </div>
+
+        <div className="checkout-secure">
+          <span>🔒</span>
+          Secure Checkout
+        </div>
+      </div>
 
       {error && (
-        <p role="alert" style={{ color: "red" }}>
+        <div className="checkout-alert" role="alert">
+          <span>⚠️</span>
           {error}
-        </p>
+        </div>
       )}
 
-      <section className="restaurant-card" style={{ padding: 20 }}>
-        <h2>Delivery Address</h2>
+      <div className="checkout-layout">
+        <div className="checkout-main">
+          <section className="checkout-section">
+            <div className="checkout-section-heading">
+              <div className="checkout-step">1</div>
+              <div>
+                <h2>Delivery address</h2>
+                <p>Where should we deliver your food?</p>
+              </div>
+            </div>
 
-        {addresses.length === 0 ? (
-          <>
-            <p>No saved address found.</p>
-            <button onClick={() => navigate("/addresses")}>
-              Add Address
-            </button>
-          </>
-        ) : (
-          addresses.map((address) => (
-            <label
-              key={address._id}
-              style={{
-                display: "block",
-                padding: 12,
-                margin: "12px 0",
-                border: "1px solid #ddd",
-                borderRadius: 10,
-                cursor: "pointer",
-              }}
-            >
-              <input
-                type="radio"
-                name="deliveryAddress"
-                value={address._id}
-                checked={selectedAddress === address._id}
-                onChange={() => setSelectedAddress(address._id)}
-              />
+            {addresses.length === 0 ? (
+              <div className="checkout-empty-address">
+                <span className="checkout-empty-icon">📍</span>
+                <h3>No saved address</h3>
+                <p>Add a delivery address to continue with your order.</p>
+                <button
+                  type="button"
+                  className="checkout-outline-btn"
+                  onClick={() => navigate("/addresses")}
+                >
+                  + Add delivery address
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="checkout-address-list">
+                  {addresses.map((address) => (
+                    <label
+                      key={address._id}
+                      className={`checkout-address-option ${
+                        selectedAddress === address._id
+                          ? "selected"
+                          : ""
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="deliveryAddress"
+                        value={address._id}
+                        checked={selectedAddress === address._id}
+                        onChange={() =>
+                          setSelectedAddress(address._id)
+                        }
+                      />
 
-              <strong style={{ marginLeft: 10 }}>
-                {address.label} — {address.fullName}
-                {address.isDefault ? " (Default)" : ""}
-              </strong>
+                      <span className="checkout-custom-radio" />
 
-              <p>
-                {address.addressLine1}
-                {address.addressLine2
-                  ? `, ${address.addressLine2}`
-                  : ""}
-                , {address.city}, {address.state} - {address.pincode}
+                      <div className="checkout-address-content">
+                        <div className="checkout-address-title">
+                          <strong>
+                            {address.label || "Address"}
+                          </strong>
+                          {address.isDefault && (
+                            <span className="checkout-default-tag">
+                              DEFAULT
+                            </span>
+                          )}
+                          {selectedAddress === address._id && (
+                            <span className="checkout-selected-tag">
+                              SELECTED
+                            </span>
+                          )}
+                        </div>
+
+                        <h3>{address.fullName}</h3>
+
+                        <p>
+                          {address.addressLine1}
+                          {address.addressLine2
+                            ? `, ${address.addressLine2}`
+                            : ""}
+                        </p>
+
+                        <p>
+                          {address.city}, {address.state} -{" "}
+                          {address.pincode}
+                        </p>
+
+                        {address.landmark && (
+                          <p>Landmark: {address.landmark}</p>
+                        )}
+
+                        <span className="checkout-address-phone">
+                          ☎ {address.phone}
+                        </span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="checkout-manage-link"
+                  onClick={() => navigate("/addresses")}
+                >
+                  Manage saved addresses →
+                </button>
+              </>
+            )}
+          </section>
+
+          <section className="checkout-section">
+            <div className="checkout-section-heading">
+              <div className="checkout-step">2</div>
+              <div>
+                <h2>Payment method</h2>
+                <p>Choose how you would like to pay.</p>
+              </div>
+            </div>
+
+            <div className="checkout-payment-list">
+              <label
+                className={`checkout-payment-option ${
+                  paymentMethod === "COD" ? "selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="COD"
+                  checked={paymentMethod === "COD"}
+                  onChange={() => setPaymentMethod("COD")}
+                />
+                <span className="checkout-payment-icon">💵</span>
+                <span className="checkout-payment-text">
+                  <strong>Cash on Delivery</strong>
+                  <small>Pay when your order arrives</small>
+                </span>
+                <span className="checkout-custom-radio" />
+              </label>
+
+              <label
+                className={`checkout-payment-option ${
+                  paymentMethod === "ONLINE" ? "selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="ONLINE"
+                  checked={paymentMethod === "ONLINE"}
+                  onChange={() => setPaymentMethod("ONLINE")}
+                />
+                <span className="checkout-payment-icon">💳</span>
+                <span className="checkout-payment-text">
+                  <strong>Online Payment</strong>
+                  <small>Secure payment with Razorpay</small>
+                </span>
+                <span className="checkout-custom-radio" />
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <aside className="checkout-summary">
+          <div className="checkout-summary-heading">
+            <h2>Order Summary</h2>
+            <span>{cartItems.length} items</span>
+          </div>
+
+          <div className="checkout-summary-items">
+            {cartItems.map((item) => (
+              <div className="checkout-summary-item" key={item._id}>
+                <div className="checkout-item-info">
+                  <strong>{item.name}</strong>
+                  <span>Qty: {item.quantity}</span>
+                </div>
+                <strong>
+                  ₹{Number(item.price) * Number(item.quantity)}
+                </strong>
+              </div>
+            ))}
+
+            {cartItems.length === 0 && (
+              <p className="checkout-empty-cart">
+                Your cart is currently empty.
               </p>
+            )}
+          </div>
 
-              <p>Phone: {address.phone}</p>
-            </label>
-          ))
-        )}
+          <div className="checkout-summary-divider" />
 
-        {addresses.length > 0 && (
+          <div className="checkout-total-row">
+            <span>Item total</span>
+            <strong>₹{totalAmount}</strong>
+          </div>
+
+          <div className="checkout-total-row">
+            <span>Delivery fee</span>
+            <strong className="checkout-free">To be calculated</strong>
+          </div>
+
+          <div className="checkout-summary-divider" />
+
+          <div className="checkout-grand-total">
+            <span>To pay</span>
+            <strong>₹{totalAmount}</strong>
+          </div>
+
+          {selectedAddressData && (
+            <div className="checkout-delivery-preview">
+              <span>📍 Delivering to</span>
+              <strong>
+                {selectedAddressData.label} ·{" "}
+                {selectedAddressData.city}
+              </strong>
+            </div>
+          )}
+
           <button
             type="button"
-            onClick={() => navigate("/addresses")}
+            className="checkout-place-order-btn"
+            onClick={handlePlaceOrder}
+            disabled={
+              loading ||
+              cartItems.length === 0 ||
+              addresses.length === 0 ||
+              !selectedAddress
+            }
           >
-            Manage Addresses
+            {loading ? "Placing Order..." : "Place Order"}
+            {!loading && <span>→</span>}
           </button>
-        )}
-      </section>
 
-      <section className="restaurant-card" style={{ padding: 20, marginTop: 20 }}>
-        <h2>Payment Method</h2>
-
-        <label style={{ display: "block", margin: "15px 0" }}>
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="COD"
-            checked={paymentMethod === "COD"}
-            onChange={() => setPaymentMethod("COD")}
-          />
-          <span style={{ marginLeft: 10 }}>
-            Cash on Delivery (COD)
-          </span>
-        </label>
-
-        <label style={{ display: "block", margin: "15px 0" }}>
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="ONLINE"
-            checked={paymentMethod === "ONLINE"}
-            onChange={() => setPaymentMethod("ONLINE")}
-          />
-          <span style={{ marginLeft: 10 }}>
-            Online Payment (Razorpay)
-          </span>
-        </label>
-      </section>
-
-      <section className="restaurant-card" style={{ padding: 20, marginTop: 20 }}>
-        <h2>Order Summary</h2>
-
-        {cartItems.map((item) => (
-          <p key={item._id}>
-            {item.name} × {item.quantity} — ₹
-            {item.price * item.quantity}
+          <p className="checkout-terms">
+            🔒 Your order details are secure with FoodFlow.
           </p>
-        ))}
-
-        <h3>Total: ₹{totalAmount}</h3>
-
-        <button
-          type="button"
-          onClick={handlePlaceOrder}
-          disabled={
-            loading ||
-            cartItems.length === 0 ||
-            addresses.length === 0
-          }
-        >
-          {loading ? "Placing Order..." : "Place Order"}
-        </button>
-      </section>
-    </div>
+        </aside>
+      </div>
+    </main>
   );
 }
 

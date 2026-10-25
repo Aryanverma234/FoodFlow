@@ -5,12 +5,40 @@
 
 :root {
   font-family: Inter, Arial, sans-serif;
-  color: #17251b;
-  background: #f3f7f2;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  color-scheme: light;
+
+  --app-bg: #f3f7f2;
+  --surface: #ffffff;
+  --surface-soft: #fcfefc;
+  --text-primary: #17251b;
+  --text-secondary: #718076;
+  --border-color: #e0e9e1;
+  --navbar-bg: rgba(255, 255, 255, 0.97);
+  --input-bg: #ffffff;
+  --shadow-color: rgba(22, 60, 34, 0.1);
+  --green: #16864a;
+  --green-dark: #106638;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --app-bg: #121a15;
+  --surface: #1d2921;
+  --surface-soft: #243229;
+  --text-primary: #edf5ef;
+  --text-secondary: #a7b7aa;
+  --border-color: #35483a;
+  --navbar-bg: rgba(25, 37, 29, 0.97);
+  --input-bg: #26352b;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --green: #42b978;
+  --green-dark: #29965c;
 }
 
 * {
@@ -20,17 +48,22 @@
 html {
   min-width: 320px;
   scroll-behavior: smooth;
+  background: var(--app-bg);
 }
 
 #root {
   min-height: 100vh;
+  background: var(--app-bg);
+  color: var(--text-primary);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f3f7f2;
+  background: var(--app-bg);
+  color: var(--text-primary);
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 button,
@@ -50,6 +83,10 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
+a {
+  color: inherit;
+}
+
 /* =========================================
    PREMIUM NAVBAR
 ========================================= */
@@ -65,15 +102,16 @@ input:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 30px;
-  background: rgba(255, 255, 255, 0.97);
-  border-bottom: 1px solid #e9eee9;
-  box-shadow: 0 3px 18px rgba(20, 50, 25, 0.055);
+  background: var(--navbar-bg);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 3px 18px var(--shadow-color);
   backdrop-filter: blur(12px);
+  transition: background 0.25s ease, border-color 0.25s ease;
 }
 
 .navbar .logo {
   flex-shrink: 0;
-  color: #16864a;
+  color: var(--green);
   font-size: 27px;
   font-weight: 900;
   letter-spacing: -1.2px;
@@ -90,7 +128,7 @@ input:focus-visible {
 .nav-links a {
   position: relative;
   padding: 9px 0;
-  color: #424b43;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 650;
   text-decoration: none;
@@ -99,7 +137,7 @@ input:focus-visible {
 }
 
 .nav-links a:hover {
-  color: #16864a;
+  color: var(--green);
 }
 
 .nav-links a::after {
@@ -109,7 +147,7 @@ input:focus-visible {
   left: 0;
   height: 2px;
   border-radius: 5px;
-  background: #16864a;
+  background: var(--green);
   content: "";
   transform: scaleX(0);
   transform-origin: left;
@@ -124,7 +162,7 @@ input:focus-visible {
   padding: 10px 19px;
   border: none;
   border-radius: 9px;
-  background: #16864a;
+  background: var(--green);
   color: #ffffff;
   font-size: 13px;
   font-weight: 750;
@@ -133,7 +171,34 @@ input:focus-visible {
 }
 
 .nav-links button:hover {
-  background: #106638;
+  background: var(--green-dark);
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   DARK MODE TOGGLE BUTTON
+========================================= */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--green);
+  color: var(--green);
   transform: translateY(-1px);
 }
 
@@ -161,6 +226,21 @@ input:focus-visible {
     linear-gradient(135deg, #f7faf7, #edf5ee);
 }
 
+:root[data-theme="dark"] .foodflow-container {
+  background:
+    radial-gradient(
+      circle at 5% 0%,
+      rgba(30, 83, 49, 0.2),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 95% 15%,
+      rgba(27, 76, 43, 0.16),
+      transparent 28%
+    ),
+    linear-gradient(135deg, #121a15, #18251b);
+}
+
 /* =========================================
    MAIN CARD
 ========================================= */
@@ -169,16 +249,16 @@ input:focus-visible {
   width: 100%;
   max-width: 900px;
   padding: 36px;
-  border: 1px solid #e0e9e1;
+  border: 1px solid var(--border-color);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.97);
-  box-shadow: 0 24px 70px rgba(22, 60, 34, 0.1);
+  background: var(--surface);
+  box-shadow: 0 24px 70px var(--shadow-color);
   animation: cardEnter 0.45s ease-out;
 }
 
 .foodflow-card > h1 {
   margin: 0;
-  color: #15803d;
+  color: var(--green);
   font-size: 38px;
   font-weight: 850;
   letter-spacing: -1.7px;
@@ -187,7 +267,7 @@ input:focus-visible {
 
 .subtitle {
   margin: 8px 0 32px;
-  color: #718076;
+  color: var(--text-secondary);
   text-align: center;
   font-size: 14px;
   letter-spacing: 0.2px;
@@ -202,20 +282,20 @@ input:focus-visible {
   flex-direction: column;
   gap: 12px;
   padding: 24px;
-  border: 1px solid #e7eee8;
+  border: 1px solid var(--border-color);
   border-radius: 18px;
-  background: #fcfefc;
+  background: var(--surface-soft);
 }
 
 .foodflow-form h2 {
   margin: 0 0 10px;
-  color: #1c3022;
+  color: var(--text-primary);
   font-size: 23px;
   letter-spacing: -0.6px;
 }
 
 .foodflow-form label {
-  color: #37463a;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 650;
 }
@@ -224,21 +304,21 @@ input:focus-visible {
   width: 100%;
   min-height: 46px;
   padding: 12px 14px;
-  border: 1px solid #d7e2d9;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   outline: none;
-  background: #ffffff;
-  color: #17251b;
+  background: var(--input-bg);
+  color: var(--text-primary);
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
 .foodflow-form input::placeholder {
-  color: #9aa69d;
+  color: var(--text-secondary);
 }
 
 .foodflow-form input:focus {
-  border-color: #16a34a;
-  background: #ffffff;
+  border-color: var(--green);
+  background: var(--input-bg);
   box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1);
 }
 
@@ -250,7 +330,7 @@ input:focus-visible {
   padding: 12px 16px;
   border: 1px solid transparent;
   border-radius: 10px;
-  background: #15803d;
+  background: var(--green);
   color: #ffffff;
   font-weight: 700;
   cursor: pointer;
@@ -266,7 +346,7 @@ input:focus-visible {
 .orders-section button:hover:not(:disabled),
 .order-card > button:hover:not(:disabled),
 .status-message button:hover:not(:disabled) {
-  background: #116b35;
+  background: var(--green-dark);
   box-shadow: 0 5px 14px rgba(22, 134, 74, 0.15);
   transform: translateY(-1px);
 }
@@ -277,6 +357,34 @@ input:focus-visible {
 .status-message button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* =========================================
+   COMMON DARK MODE OVERRIDES
+========================================= */
+
+:root[data-theme="dark"] .myorder-card,
+:root[data-theme="dark"] .address-card,
+:root[data-theme="dark"] .checkout-card,
+:root[data-theme="dark"] .cart-card,
+:root[data-theme="dark"] .restaurant-card,
+:root[data-theme="dark"] .menu-card {
+  background: var(--surface);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select {
+  background: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+  color: var(--text-secondary);
 }
 
 /* =========================================
@@ -338,6 +446,11 @@ input:focus-visible {
     font-size: 12px;
   }
 
+  .theme-toggle {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
   .foodflow-container {
     padding: 22px 12px;
   }
@@ -349,5 +462,84 @@ input:focus-visible {
 
   .foodflow-card > h1 {
     font-size: 29px;
+  }
+}
+
+.nav-links .theme-toggle {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-primary);
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nav-links .theme-toggle:hover {
+  background: var(--surface-soft);
+  color: var(--green);
+  border-color: var(--green);
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.navbar .logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navbar .logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navbar .logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navbar .logo img {
+  display: block;
+  width: 220px;
+  height: 74px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+@media (max-width: 600px) {
+  .navbar .logo img {
+    width: 165px;
+    height: 55px;
+  }
+}
+.navbar {
+  min-height: 90px;
+}
+
+.navbar .logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navbar .logo img {
+  display: block;
+  width: 250px;
+  height: 82px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    min-height: auto;
+  }
+
+  .navbar .logo img {
+    width: 175px;
+    height: 58px;
   }
 }

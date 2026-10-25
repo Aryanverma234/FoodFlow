@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import "./MyOrders.css";
 
 const API_URL = "http://localhost:5000/api";
 
@@ -152,7 +153,7 @@ function MyOrders() {
         },
 
         theme: {
-          color: "#16a34a",
+          color: "#e83b4b",
         },
       };
 
@@ -176,147 +177,198 @@ function MyOrders() {
     }
   };
 
-  return (
-    <main className="foodflow-container">
-      <section className="foodflow-card">
-        <div className="orders-heading">
-          <h1>My Orders</h1>
+  const getPaymentClass = (status) => {
+    const value = (status || "").toUpperCase();
 
+    if (value === "PAID" || value === "SUCCESS") return "paid";
+    if (value === "FAILED") return "failed";
+    if (value === "REFUNDED") return "refunded";
+
+    return "pending";
+  };
+
+  const getOrderClass = (status) => {
+    const value = (status || "").toUpperCase();
+
+    if (value === "DELIVERED" || value === "COMPLETED") {
+      return "delivered";
+    }
+    if (value === "CANCELLED") return "cancelled";
+
+    return "processing";
+  };
+
+  return (
+    <main className="myorders-page">
+      <div className="myorders-heading">
+        <div>
+          <span className="myorders-eyebrow">FOODFLOW</span>
+          <h1>My Orders</h1>
+          <p>Track your orders and view your purchase history.</p>
+        </div>
+
+        <button
+          type="button"
+          className="myorders-refresh"
+          onClick={fetchMyOrders}
+          disabled={ordersLoading}
+        >
+          <span>↻</span>
+          {ordersLoading ? "Refreshing..." : "Refresh Orders"}
+        </button>
+      </div>
+
+      {message && (
+        <div className="myorders-message" role="status">
+          <span>ℹ️</span>
+          {message}
+          <button type="button" onClick={() => setMessage("")}>
+            ×
+          </button>
+        </div>
+      )}
+
+      {ordersError && (
+        <div className="myorders-error" role="alert">
+          <p>{ordersError}</p>
           <button
             type="button"
-            className="secondary-button"
             onClick={fetchMyOrders}
             disabled={ordersLoading}
           >
-            {ordersLoading ? "Loading..." : "Refresh"}
+            Try Again
           </button>
         </div>
+      )}
 
-        {ordersLoading && orders.length === 0 && (
-          <p>Loading your orders...</p>
-        )}
+      {ordersLoading && orders.length === 0 && !ordersError && (
+        <div className="myorders-empty">
+          <div className="myorders-empty-icon">🍽️</div>
+          <h2>Loading your orders...</h2>
+          <p>Please wait while we fetch your order history.</p>
+        </div>
+      )}
 
-        {ordersError && (
-          <div className="status-message" role="alert">
-            <p>{ordersError}</p>
-            <button onClick={fetchMyOrders} disabled={ordersLoading}>
-              Try Again
-            </button>
-          </div>
-        )}
+      {!ordersLoading && !ordersError && orders.length === 0 && (
+        <div className="myorders-empty">
+          <div className="myorders-empty-icon">🛍️</div>
+          <h2>No orders yet</h2>
+          <p>Your delicious food orders will appear here.</p>
+        </div>
+      )}
 
-        {!ordersLoading && !ordersError && orders.length === 0 && (
-          <div className="empty-orders">
-            <h3>No orders yet</h3>
-            <p>Your food orders will appear here.</p>
-          </div>
-        )}
+      {orders.length > 0 && (
+        <div className="myorders-list">
+          {orders.map((order) => {
+            const canPay =
+              order.paymentMethod === "ONLINE" &&
+              order.paymentStatus !== "PAID" &&
+              order.paymentStatus !== "REFUNDED" &&
+              order.orderStatus !== "CANCELLED";
 
-        {orders.length > 0 && (
-          <div className="orders-list">
-            {orders.map((order) => {
-              const canPay =
-                order.paymentMethod === "ONLINE" &&
-                order.paymentStatus !== "PAID" &&
-                order.paymentStatus !== "REFUNDED" &&
-                order.orderStatus !== "CANCELLED";
-
-              return (
-                <article className="order-card" key={order._id}>
-                  <div className="order-card-header">
+            return (
+              <article className="myorder-card" key={order._id}>
+                <div className="myorder-top">
+                  <div className="myorder-identity">
+                    <div className="myorder-restaurant-icon">🍴</div>
                     <div>
-                      <h3>{order.orderNumber || "FoodFlow Order"}</h3>
-                      <p className="order-date">
-                        {formatDate(order.createdAt)}
-                      </p>
+                      <h2>
+                        {order.restaurant?.name || "FoodFlow Restaurant"}
+                      </h2>
+                      <p>{formatDate(order.createdAt)}</p>
                     </div>
+                  </div>
 
-                    <strong className="order-total">
-                      {formatCurrency(order.total)}
+                  <div className="myorder-number">
+                    <span>ORDER ID</span>
+                    <strong>
+                      {order.orderNumber || order._id}
                     </strong>
                   </div>
+                </div>
 
-                  <div className="order-details">
-                    <p>
-                      <strong>Restaurant:</strong>{" "}
-                      {order.restaurant?.name || "Restaurant"}
-                    </p>
+                <div className="myorder-body">
+                  <div className="myorder-items-section">
+                    <h3>Order Items</h3>
 
-                    <p>
-                      <strong>Order ID:</strong>{" "}
-                      <span className="order-id">{order._id}</span>
-                    </p>
-
-                    <p>
-                      <strong>Payment Method:</strong>{" "}
-                      {formatStatus(order.paymentMethod)}
-                    </p>
-
-                    <p>
-                      <strong>Payment:</strong>{" "}
-                      <span
-                        className={`status-badge ${
-                          order.paymentStatus === "PAID"
-                            ? "status-success"
-                            : "status-pending"
-                        }`}
-                      >
-                        {formatStatus(order.paymentStatus)}
-                      </span>
-                    </p>
-
-                    <p>
-                      <strong>Order Status:</strong>{" "}
-                      <span className="status-badge">
-                        {formatStatus(order.orderStatus)}
-                      </span>
-                    </p>
-                  </div>
-
-                  {Array.isArray(order.items) &&
-                    order.items.length > 0 && (
-                      <div className="order-items">
-                        <strong>Items:</strong>
-
-                        <ul>
-                          {order.items.map((item, index) => (
-                            <li key={item._id || index}>
+                    {Array.isArray(order.items) &&
+                    order.items.length > 0 ? (
+                      <ul className="myorder-items">
+                        {order.items.map((item, index) => (
+                          <li key={item._id || index}>
+                            <span>
                               {item.name ||
                                 item.food?.name ||
                                 item.menuItem?.name ||
-                                "Food item"}{" "}
-                              × {item.quantity || 1}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                                "Food item"}
+                            </span>
+                            <strong>× {item.quantity || 1}</strong>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="myorder-muted">No item details available.</p>
                     )}
+                  </div>
+
+                  <div className="myorder-status-section">
+                    <div className="myorder-status-row">
+                      <span>Order Status</span>
+                      <strong
+                        className={`myorder-badge order-${getOrderClass(
+                          order.orderStatus
+                        )}`}
+                      >
+                        {formatStatus(order.orderStatus)}
+                      </strong>
+                    </div>
+
+                    <div className="myorder-status-row">
+                      <span>Payment Status</span>
+                      <strong
+                        className={`myorder-badge payment-${getPaymentClass(
+                          order.paymentStatus
+                        )}`}
+                      >
+                        {formatStatus(order.paymentStatus)}
+                      </strong>
+                    </div>
+
+                    <div className="myorder-status-row">
+                      <span>Payment Method</span>
+                      <strong>
+                        {formatStatus(order.paymentMethod)}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="myorder-bottom">
+                  <div className="myorder-total">
+                    <span>Order Total</span>
+                    <strong>{formatCurrency(order.total)}</strong>
+                  </div>
 
                   {canPay && (
                     <button
                       type="button"
+                      className="myorder-pay-btn"
                       onClick={() => handlePayment(order._id)}
                       disabled={loading}
                     >
-                      {loading ? "Please wait..." : "Pay Now"}
+                      {loading ? "Please wait..." : "Pay Now →"}
                     </button>
                   )}
-                </article>
-              );
-            })}
-          </div>
-        )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
 
-        {message && (
-          <p className="status-message" role="status">
-            {message}
-          </p>
-        )}
-
-        <p className="test-note">
-          Razorpay Test Mode integration for FoodFlow.
-        </p>
-      </section>
+      <p className="myorders-footer-note">
+        🔒 Your order and payment information is securely managed by FoodFlow.
+      </p>
     </main>
   );
 }
