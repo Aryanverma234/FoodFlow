@@ -1,12 +1,13 @@
 
 import { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const API_URL = "http://localhost:5000/api";
 
 function Login() {
-  const { setToken } = useAuth();
+  const { setToken, setUser } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,9 +26,12 @@ function Login() {
       });
 
       setToken(response.data.token);
+      setUser(response.data.user);
+
       setMessage(
         `Welcome, ${response.data.user.name}! Login successful.`
       );
+
       setPassword("");
     } catch (error) {
       setMessage(
@@ -73,6 +77,11 @@ function Login() {
         </form>
 
         {message && <p className="status-message">{message}</p>}
+
+        <p className="register-login">
+          Don't have an account?{" "}
+          <Link to="/register">Create Account</Link>
+        </p>
       </section>
     </main>
   );
