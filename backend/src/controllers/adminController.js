@@ -2,6 +2,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Restaurant = require("../models/Restaurant");
+const Order = require("../models/Order");
 
 // =====================================
 // CREATE RESTAURANT OWNER - ADMIN ONLY
@@ -160,7 +161,81 @@ const approveRestaurant = async (req, res) => {
   }
 };
 
+// =====================================
+// GET ALL ORDERS - ADMIN ONLY
+// =====================================
+const getAllAdminOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("user", "name email phone")
+      .populate("restaurant", "name")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders,
+    });
+  } catch (error) {
+    console.error("Admin Get Platform Orders Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching platform orders",
+    });
+  }
+};
+
+// =====================================
+// GET PLATFORM STATS - ADMIN ONLY
+// =====================================
+const getAdminStats = async (req, res) => {
+  try {
+    const [
+      totalRestaurants,
+      totalOwners,
+      totalUsers,
+      totalOrders,
+      paidOrders,
+      pendingApprovals,
+    ] = await Promise.all([
+      Restaurant.countDocuments(),
+      User.countDocuments({ role: "restaurant" }),
+      User.countDocuments({ role: "customer" }),
+      Order.countDocuments(),
+      Order.find({ paymentStatus: "PAID" }, "total"),
+      Restaurant.countDocuments({ isApproved: false }),
+    ]);
+
+    const totalRevenue = paidOrders.reduce(
+      (sum, item) => sum + (item.total || 0),
+      0
+    );
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        totalRestaurants,
+        totalOwners,
+        totalUsers,
+        totalOrders,
+        totalRevenue,
+        pendingApprovals,
+      },
+    });
+  } catch (error) {
+    console.error("Admin Get Platform Stats Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching admin stats",
+    });
+  }
+};
+
 module.exports = {
+  getAllAdminOrders,
+  getAdminStats,
   createRestaurantOwner,
   getAllRestaurantOwners,
   getAllAdminRestaurants,

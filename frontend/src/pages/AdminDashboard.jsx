@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
@@ -29,6 +30,13 @@ function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const [adminOrders, setAdminOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [adminStats, setAdminStats] = useState(null);
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderFilter, setOrderFilter] = useState("all");
+  const [paymentFilter, setPaymentFilter] = useState("all");
+
   const [ownerForm, setOwnerForm] = useState({
     name: "",
     email: "",
@@ -54,10 +62,6 @@ function AdminDashboard() {
       );
 
       setRestaurants(response.data.restaurants || []);
-console.log(
-  "FULL RESTAURANT DATA:",
-  JSON.stringify(response.data.restaurants, null, 2)
-);
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -89,10 +93,48 @@ console.log(
     }
   };
 
+  // FETCH ALL PLATFORM ORDERS
+  const fetchAdminOrders = async () => {
+    try {
+      setOrdersLoading(true);
+
+      const response = await axios.get(
+        `${API_URL}/admin/orders`,
+        authConfig
+      );
+
+      setAdminOrders(response.data.orders || []);
+    } catch (err) {
+      console.error("Admin orders load error:", err);
+      setError(
+        err.response?.data?.message ||
+          "Orders load nahi ho paye."
+      );
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  // FETCH PLATFORM STATS
+  const fetchAdminStats = async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/admin/stats`,
+        authConfig
+      );
+
+      setAdminStats(response.data.stats || null);
+    } catch (err) {
+      console.error("Admin stats load error:", err);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchRestaurants();
       fetchOwners();
+      fetchAdminOrders();
+      fetchAdminStats();
     }
   }, [token]);
 
@@ -125,6 +167,7 @@ console.log(
       );
 
       await fetchRestaurants();
+      await fetchAdminStats();
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -175,6 +218,7 @@ console.log(
       setShowOwnerForm(false);
 
       await fetchOwners();
+      await fetchAdminStats();
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -216,7 +260,6 @@ console.log(
 
     if (!image) return "";
 
-    // Handle Cloudinary or other image objects
     if (typeof image === "object") {
       const imageUrl =
         image.url ||
@@ -240,7 +283,6 @@ console.log(
 
     if (!cleanImage) return "";
 
-    // Full image URL
     if (
       cleanImage.startsWith("https://") ||
       cleanImage.startsWith("http://") ||
@@ -249,18 +291,86 @@ console.log(
       return cleanImage;
     }
 
-    // Protocol-relative URL
     if (cleanImage.startsWith("//")) {
       return `https:${cleanImage}`;
     }
 
-    // Backend-relative image path
     return `http://localhost:5000${
       cleanImage.startsWith("/") ? "" : "/"
     }${cleanImage}`;
   };
 
-  // COUNTS
+  // ORDER HELPERS
+  const getOrderStatus = (order) =>
+    String(order.orderStatus || order.status || "PLACED").toUpperCase();
+
+  const getPaymentStatus = (order) =>
+    String(order.paymentStatus || order.payment?.status || "PENDING").toUpperCase();
+
+  const getCustomerName = (order) =>
+    order.user?.name || order.customer?.name || "Unknown Customer";
+
+  const getCustomerEmail = (order) =>
+    order.user?.email || order.customer?.email || "N/A";
+
+  const getRestaurantName = (order) =>
+    order.restaurant?.name || "Restaurant";
+
+  const getOrderAmount = (order) =>
+    Number(
+      order.total ??
+      order.totalAmount ??
+      order.grandTotal ??
+      order.amount ??
+      0
+    );
+
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) return "N/A";
+
+    return parsedDate.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getStatusClass = (status) =>
+    String(status).toLowerCase().replaceAll("_", "-");
+
+  // FILTER ORDERS
+  const filteredOrders = adminOrders.filter((order) => {
+    const status = getOrderStatus(order);
+    const payment = getPaymentStatus(order);
+
+    const search = orderSearch.toLowerCase().trim();
+
+    const matchesSearch =
+      !search ||
+      String(order._id || "").toLowerCase().includes(search) ||
+      getCustomerName(order).toLowerCase().includes(search) ||
+      getCustomerEmail(order).toLowerCase().includes(search) ||
+      getRestaurantName(order).toLowerCase().includes(search);
+
+    const matchesOrderStatus =
+      orderFilter === "all" || status === orderFilter;
+
+    const matchesPaymentStatus =
+      paymentFilter === "all" || payment === paymentFilter;
+
+    return (
+      matchesSearch &&
+      matchesOrderStatus &&
+      matchesPaymentStatus
+    );
+  });
+
   const pendingCount = restaurants.filter(
     (restaurant) => !restaurant.isApproved
   ).length;
@@ -288,8 +398,8 @@ console.log(
     {
       icon: "🛍️",
       title: "Total Orders",
-      value: "—",
-      note: "Orders API pending",
+      value: adminStats?.totalOrders ?? adminOrders.length,
+      note: `₹${Number(adminStats?.totalRevenue ?? 0).toLocaleString("en-IN")} Revenue`,
     },
     {
       icon: "⏳",
@@ -335,7 +445,6 @@ console.log(
               onClick={() => handleSectionChange(item.id)}
             >
               <span>{item.icon}</span>
-
               {item.label}
 
               {activeSection === item.id && (
@@ -399,11 +508,7 @@ console.log(
           {error && (
             <div className="admin-alert admin-alert-error">
               {error}
-
-              <button
-                type="button"
-                onClick={() => setError("")}
-              >
+              <button type="button" onClick={() => setError("")}>
                 ×
               </button>
             </div>
@@ -413,19 +518,13 @@ console.log(
           {success && (
             <div className="admin-alert admin-alert-success">
               {success}
-
-              <button
-                type="button"
-                onClick={() => setSuccess("")}
-              >
+              <button type="button" onClick={() => setSuccess("")}>
                 ×
               </button>
             </div>
           )}
 
-          {/* =========================
-              OVERVIEW
-          ========================= */}
+          {/* OVERVIEW */}
           {activeSection === "overview" && (
             <>
               <section className="admin-welcome">
@@ -447,7 +546,6 @@ console.log(
                 <div className="admin-welcome-icon">🍽️</div>
               </section>
 
-              {/* STATS */}
               <section className="admin-stats-grid">
                 {stats.map((stat) => (
                   <article
@@ -459,17 +557,13 @@ console.log(
                         {stat.icon}
                       </span>
 
-                      <span className="admin-stat-menu">
-                        •••
-                      </span>
+                      <span className="admin-stat-menu">•••</span>
                     </div>
 
                     <p>{stat.title}</p>
 
                     <h2>
-                      {loading || ownersLoading
-                        ? "..."
-                        : stat.value}
+                      {loading || ownersLoading ? "..." : stat.value}
                     </h2>
 
                     <small>{stat.note}</small>
@@ -477,7 +571,6 @@ console.log(
                 ))}
               </section>
 
-              {/* APPROVAL SUMMARY */}
               <section className="admin-section admin-overview-summary">
                 <div className="admin-section-heading">
                   <div>
@@ -500,7 +593,6 @@ console.log(
                     <span className="admin-summary-number">
                       {approvedCount}
                     </span>
-
                     <span>Approved Restaurants</span>
                   </div>
 
@@ -508,23 +600,19 @@ console.log(
                     <span className="admin-summary-number">
                       {pendingCount}
                     </span>
-
                     <span>Pending Approvals</span>
                   </div>
 
                   <button
                     type="button"
                     className="admin-primary-btn"
-                    onClick={() =>
-                      handleSectionChange("restaurants")
-                    }
+                    onClick={() => handleSectionChange("restaurants")}
                   >
                     Manage Restaurants →
                   </button>
                 </div>
               </section>
 
-              {/* QUICK ACCESS */}
               <section className="admin-section">
                 <div className="admin-section-heading">
                   <div>
@@ -547,17 +635,11 @@ console.log(
                       <button
                         type="button"
                         key={item.id}
-                        onClick={() =>
-                          handleSectionChange(item.id)
-                        }
+                        onClick={() => handleSectionChange(item.id)}
                       >
                         <span>{item.icon}</span>
-
                         <strong>{item.label}</strong>
-
-                        <span className="admin-quick-arrow">
-                          →
-                        </span>
+                        <span className="admin-quick-arrow">→</span>
                       </button>
                     ))}
                 </div>
@@ -565,9 +647,7 @@ console.log(
             </>
           )}
 
-          {/* =========================
-              RESTAURANTS
-          ========================= */}
+          {/* RESTAURANTS */}
           {activeSection === "restaurants" && (
             <section className="admin-section">
               <div className="admin-section-heading">
@@ -586,7 +666,6 @@ console.log(
                 <span className="admin-section-icon">🏪</span>
               </div>
 
-              {/* TOOLBAR */}
               <div className="admin-management-toolbar">
                 <div className="admin-approval-counts">
                   <span className="admin-count-approved">
@@ -608,41 +687,32 @@ console.log(
                 </button>
               </div>
 
-              {/* LOADING */}
               {loading ? (
                 <div className="admin-empty-state">
                   <div>⏳</div>
-
                   <h3>Loading restaurants...</h3>
-
                   <p>
                     Please wait while we fetch restaurant details.
                   </p>
                 </div>
               ) : restaurants.length === 0 ? (
-                /* NO RESTAURANTS */
                 <div className="admin-empty-state">
                   <div>🏪</div>
-
                   <h3>No restaurants found</h3>
-
                   <p>
                     New restaurant registrations will appear here.
                   </p>
                 </div>
               ) : (
-                /* RESTAURANT LIST */
                 <div className="admin-restaurant-list">
                   {restaurants.map((restaurant) => {
-                    const imageUrl =
-                      getRestaurantImage(restaurant);
+                    const imageUrl = getRestaurantImage(restaurant);
 
                     return (
                       <article
                         className="admin-restaurant-card"
                         key={restaurant._id}
                       >
-                        {/* RESTAURANT IMAGE */}
                         <div className="admin-restaurant-image">
                           {imageUrl && (
                             <img
@@ -664,7 +734,6 @@ console.log(
                             />
                           )}
 
-                          {/* FALLBACK IMAGE */}
                           <div
                             className="admin-restaurant-image-fallback"
                             style={{
@@ -674,11 +743,9 @@ console.log(
                             <span className="admin-fallback-icon">
                               🍽️
                             </span>
-
                             <span>{restaurant.name}</span>
                           </div>
 
-                          {/* APPROVAL STATUS */}
                           <span
                             className={`admin-image-status ${
                               restaurant.isApproved
@@ -692,11 +759,9 @@ console.log(
                           </span>
                         </div>
 
-                        {/* RESTAURANT NAME */}
                         <div className="admin-restaurant-card-top">
                           <div>
                             <h3>{restaurant.name}</h3>
-
                             <p>
                               {restaurant.description ||
                                 "Welcome to our restaurant."}
@@ -704,11 +769,9 @@ console.log(
                           </div>
                         </div>
 
-                        {/* RESTAURANT DETAILS */}
                         <div className="admin-restaurant-details">
                           <p>
                             <strong>👤 Owner</strong>
-
                             <span>
                               {restaurant.owner?.name || "Unknown"}
                             </span>
@@ -716,7 +779,6 @@ console.log(
 
                           <p>
                             <strong>✉️ Email</strong>
-
                             <span>
                               {restaurant.owner?.email || "N/A"}
                             </span>
@@ -724,15 +786,11 @@ console.log(
 
                           <p>
                             <strong>📞 Phone</strong>
-
-                            <span>
-                              {restaurant.phone || "N/A"}
-                            </span>
+                            <span>{restaurant.phone || "N/A"}</span>
                           </p>
 
                           <p>
                             <strong>🍴 Cuisine</strong>
-
                             <span>
                               {Array.isArray(restaurant.cuisine)
                                 ? restaurant.cuisine.join(", ")
@@ -742,7 +800,6 @@ console.log(
 
                           <p>
                             <strong>🕒 Delivery Time</strong>
-
                             <span>
                               {restaurant.deliveryTime || "N/A"}
                               {restaurant.deliveryTime ? " minutes" : ""}
@@ -751,7 +808,6 @@ console.log(
 
                           <p>
                             <strong>💰 Minimum Order</strong>
-
                             <span>
                               {restaurant.minimumOrder != null
                                 ? `₹${restaurant.minimumOrder}`
@@ -761,22 +817,18 @@ console.log(
 
                           <p className="admin-address-detail">
                             <strong>📍 Address</strong>
-
                             <span>
                               {getAddress(restaurant.address)}
                             </span>
                           </p>
                         </div>
 
-                        {/* APPROVE BUTTON */}
                         {!restaurant.isApproved && (
                           <div className="admin-restaurant-card-actions">
                             <button
                               type="button"
                               className="admin-primary-btn"
-                              disabled={
-                                approvingId === restaurant._id
-                              }
+                              disabled={approvingId === restaurant._id}
                               onClick={() =>
                                 handleApprove(restaurant._id)
                               }
@@ -795,9 +847,7 @@ console.log(
             </section>
           )}
 
-          {/* =========================
-              RESTAURANT OWNERS
-          ========================= */}
+          {/* RESTAURANT OWNERS */}
           {activeSection === "owners" && (
             <section className="admin-section">
               <div className="admin-section-heading">
@@ -817,13 +867,11 @@ console.log(
                 <span className="admin-section-icon">👥</span>
               </div>
 
-              {/* OWNER TOOLBAR */}
               <div className="admin-management-toolbar">
                 <div>
                   <span className="admin-owner-total">
                     {owners.length}
                   </span>
-
                   <span>Total Restaurant Owners</span>
                 </div>
 
@@ -842,7 +890,6 @@ console.log(
                 </button>
               </div>
 
-              {/* CREATE OWNER FORM */}
               {showOwnerForm && (
                 <form
                   onSubmit={handleCreateOwner}
@@ -850,7 +897,6 @@ console.log(
                 >
                   <div className="admin-subheading">
                     <h3>Create Owner Account</h3>
-
                     <p>
                       Enter the details to register a new restaurant
                       owner.
@@ -860,7 +906,6 @@ console.log(
                   <div className="admin-owner-form-grid">
                     <label>
                       Full Name
-
                       <input
                         type="text"
                         name="name"
@@ -873,7 +918,6 @@ console.log(
 
                     <label>
                       Email Address
-
                       <input
                         type="email"
                         name="email"
@@ -886,7 +930,6 @@ console.log(
 
                     <label>
                       Phone Number
-
                       <input
                         type="tel"
                         name="phone"
@@ -898,7 +941,6 @@ console.log(
 
                     <label>
                       Password
-
                       <input
                         type="password"
                         name="password"
@@ -923,28 +965,23 @@ console.log(
                 </form>
               )}
 
-              {/* OWNER LOADING */}
               {ownersLoading ? (
                 <p>Loading restaurant owners...</p>
               ) : owners.length === 0 ? (
                 <div className="admin-empty-state">
                   <div>👥</div>
-
                   <h3>No restaurant owners found</h3>
-
                   <p>
                     Create an owner account to get started.
                   </p>
                 </div>
               ) : (
-                /* OWNER LIST */
                 <div className="admin-owner-grid">
                   {owners.map((owner) => {
                     const linkedRestaurants = restaurants.filter(
                       (restaurant) => {
                         const ownerId =
-                          restaurant.owner?._id ||
-                          restaurant.owner;
+                          restaurant.owner?._id || restaurant.owner;
 
                         return String(ownerId) === String(owner._id);
                       }
@@ -976,7 +1013,6 @@ console.log(
                         </div>
 
                         <h3>{owner.name}</h3>
-
                         <p className="admin-owner-email">
                           {owner.email}
                         </p>
@@ -996,7 +1032,6 @@ console.log(
                 </div>
               )}
 
-              {/* REFRESH OWNERS */}
               <button
                 type="button"
                 className="admin-outline-btn admin-refresh-owners"
@@ -1008,9 +1043,7 @@ console.log(
             </section>
           )}
 
-          {/* =========================
-              ALL ORDERS
-          ========================= */}
+          {/* ALL ORDERS */}
           {activeSection === "orders" && (
             <section className="admin-section">
               <div className="admin-section-heading">
@@ -1022,24 +1055,238 @@ console.log(
                   <h2>All Orders</h2>
 
                   <p>
-                    Monitor and manage customer orders across
-                    restaurants.
+                    Monitor customer orders across all restaurants.
                   </p>
                 </div>
 
                 <span className="admin-section-icon">🛍️</span>
               </div>
 
-              <div className="admin-empty-state admin-orders-empty">
-                <div>📦</div>
+              {/* ORDER SUMMARY */}
+              <div className="admin-order-summary">
+                <article>
+                  <span>Total Orders</span>
+                  <strong>{adminOrders.length}</strong>
+                </article>
 
-                <h3>Order data will appear here</h3>
+                <article>
+                  <span>Delivered</span>
+                  <strong>
+                    {
+                      adminOrders.filter(
+                        (order) =>
+                          getOrderStatus(order) === "DELIVERED"
+                      ).length
+                    }
+                  </strong>
+                </article>
 
-                <p>
-                  Connect the admin orders API to view all restaurant
-                  orders.
-                </p>
+                <article>
+                  <span>Pending / Active</span>
+                  <strong>
+                    {
+                      adminOrders.filter(
+                        (order) =>
+                          !["DELIVERED", "CANCELLED"].includes(
+                            getOrderStatus(order)
+                          )
+                      ).length
+                    }
+                  </strong>
+                </article>
+
+                <article>
+                  <span>Paid Orders</span>
+                  <strong>
+                    {
+                      adminOrders.filter(
+                        (order) => getPaymentStatus(order) === "PAID"
+                      ).length
+                    }
+                  </strong>
+                </article>
               </div>
+
+              {/* SEARCH AND FILTERS */}
+              <div className="admin-orders-toolbar">
+                <input
+                  type="search"
+                  placeholder="Search customer, email, restaurant or Order ID..."
+                  value={orderSearch}
+                  onChange={(e) => setOrderSearch(e.target.value)}
+                />
+
+                <select
+                  value={orderFilter}
+                  onChange={(e) => setOrderFilter(e.target.value)}
+                  aria-label="Filter by order status"
+                >
+                  <option value="all">All Order Statuses</option>
+                  <option value="PLACED">Placed</option>
+                  <option value="CONFIRMED">Confirmed</option>
+                  <option value="PREPARING">Preparing</option>
+                  <option value="READY">Ready</option>
+                  <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+                  <option value="DELIVERED">Delivered</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+
+                <select
+                  value={paymentFilter}
+                  onChange={(e) => setPaymentFilter(e.target.value)}
+                  aria-label="Filter by payment status"
+                >
+                  <option value="all">All Payment Statuses</option>
+                  <option value="PAID">Paid</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="FAILED">Failed</option>
+                  <option value="REFUNDED">Refunded</option>
+                </select>
+
+                <button
+                  type="button"
+                  className="admin-outline-btn"
+                  onClick={() => {
+                    fetchAdminOrders();
+                    fetchAdminStats();
+                  }}
+                  disabled={ordersLoading}
+                >
+                  {ordersLoading ? "Loading..." : "↻ Refresh"}
+                </button>
+              </div>
+
+              {/* ORDER RESULTS */}
+              <div className="admin-orders-result-count">
+                Showing {filteredOrders.length} of {adminOrders.length} orders
+              </div>
+
+              {ordersLoading ? (
+                <div className="admin-empty-state">
+                  <div>⏳</div>
+                  <h3>Loading orders...</h3>
+                  <p>Please wait while we fetch all orders.</p>
+                </div>
+              ) : adminOrders.length === 0 ? (
+                <div className="admin-empty-state">
+                  <div>📦</div>
+                  <h3>No orders found</h3>
+                  <p>
+                    Customer orders will appear here when they are
+                    placed.
+                  </p>
+                </div>
+              ) : filteredOrders.length === 0 ? (
+                <div className="admin-empty-state">
+                  <div>🔎</div>
+                  <h3>No matching orders</h3>
+                  <p>
+                    Try changing your search or filters.
+                  </p>
+                </div>
+              ) : (
+                <div className="admin-orders-list">
+                  {filteredOrders.map((order) => {
+                    const orderStatus = getOrderStatus(order);
+                    const paymentStatus = getPaymentStatus(order);
+
+                    const items = order.items || order.orderItems || [];
+
+                    return (
+                      <article
+                        className="admin-order-card"
+                        key={order._id}
+                      >
+                        <div className="admin-order-card-header">
+                          <div>
+                            <span className="admin-order-id-label">
+                              ORDER ID
+                            </span>
+                            <strong>
+                              #{String(order._id).slice(-8).toUpperCase()}
+                            </strong>
+                          </div>
+
+                          <span
+                            className={`admin-order-status ${getStatusClass(
+                              orderStatus
+                            )}`}
+                          >
+                            {orderStatus.replaceAll("_", " ")}
+                          </span>
+                        </div>
+
+                        <div className="admin-order-card-body">
+                          <div className="admin-order-detail">
+                            <span>Customer</span>
+                            <strong>{getCustomerName(order)}</strong>
+                            <small>{getCustomerEmail(order)}</small>
+                          </div>
+
+                          <div className="admin-order-detail">
+                            <span>Restaurant</span>
+                            <strong>{getRestaurantName(order)}</strong>
+                          </div>
+
+                          <div className="admin-order-detail">
+                            <span>Order Date</span>
+                            <strong>
+                              {formatDate(order.createdAt)}
+                            </strong>
+                          </div>
+
+                          <div className="admin-order-detail">
+                            <span>Payment Method</span>
+                            <strong>
+                              {order.paymentMethod ||
+                                order.payment?.method ||
+                                "N/A"}
+                            </strong>
+                          </div>
+
+                          <div className="admin-order-detail">
+                            <span>Payment Status</span>
+                            <strong
+                              className={`admin-payment-status ${getStatusClass(
+                                paymentStatus
+                              )}`}
+                            >
+                              {paymentStatus}
+                            </strong>
+                          </div>
+
+                          <div className="admin-order-detail">
+                            <span>Total Amount</span>
+                            <strong className="admin-order-amount">
+                              ₹{getOrderAmount(order).toLocaleString("en-IN")}
+                            </strong>
+                          </div>
+                        </div>
+
+                        {items.length > 0 && (
+                          <div className="admin-order-items">
+                            <strong>Order Items</strong>
+
+                            <div>
+                              {items.map((item, index) => (
+                                <span key={item._id || index}>
+                                  {item.name ||
+                                    item.foodItem?.name ||
+                                    item.item?.name ||
+                                    "Food Item"}
+                                  {" × "}
+                                  {item.quantity || 1}
+                                  {index < items.length - 1 ? ", " : ""}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           )}
 

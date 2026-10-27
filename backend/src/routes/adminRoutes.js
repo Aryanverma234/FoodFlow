@@ -6,6 +6,8 @@ const {
   getAllRestaurantOwners,
   getAllAdminRestaurants,
   approveRestaurant,
+  getAllAdminOrders,
+  getAdminStats,
 } = require("../controllers/adminController");
 
 const protect = require("../middlewares/authMiddleware");
@@ -43,6 +45,22 @@ router.patch(
   protect,
   authorizeRoles("admin"),
   approveRestaurant
+);
+
+// Admin-only: Get all platform orders
+router.get(
+  "/orders",
+  protect,
+  authorizeRoles("admin"),
+  getAllAdminOrders
+);
+
+// Admin-only: Get platform statistics
+router.get(
+  "/stats",
+  protect,
+  authorizeRoles("admin"),
+  getAdminStats
 );
 
 module.exports = router;

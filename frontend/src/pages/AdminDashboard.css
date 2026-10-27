@@ -1,6 +1,7 @@
+
 /* =========================================
    FOODFLOW PREMIUM ADMIN DASHBOARD
-   Clean, consolidated stylesheet
+   Clean, Consistent & Responsive Styles
 ========================================= */
 
 .admin-layout {
@@ -25,7 +26,10 @@
   box-sizing: border-box;
 }
 
-/* SIDEBAR */
+/* =========================================
+   SIDEBAR
+========================================= */
+
 .admin-sidebar {
   width: 255px;
   height: 100vh;
@@ -155,7 +159,10 @@
   font-size: 11px;
 }
 
-/* MAIN AREA + TOPBAR */
+/* =========================================
+   MAIN AREA & TOPBAR
+========================================= */
+
 .admin-main {
   flex: 1;
   min-width: 0;
@@ -247,7 +254,10 @@
   padding: 32px 35px;
 }
 
-/* ALERTS */
+/* =========================================
+   ALERTS
+========================================= */
+
 .admin-alert {
   display: flex;
   align-items: center;
@@ -279,7 +289,10 @@
   border: 1px solid #d1e9d8;
 }
 
-/* WELCOME */
+/* =========================================
+   WELCOME
+========================================= */
+
 .admin-welcome {
   display: flex;
   align-items: center;
@@ -329,7 +342,10 @@
   font-size: 39px;
 }
 
-/* STAT CARDS */
+/* =========================================
+   OVERVIEW STAT CARDS
+========================================= */
+
 .admin-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0,1fr));
@@ -390,7 +406,10 @@
   font-size: 11px;
 }
 
-/* SHARED SECTIONS */
+/* =========================================
+   SHARED SECTIONS
+========================================= */
+
 .admin-section {
   margin-top: 8px;
   padding: 25px;
@@ -434,7 +453,10 @@
   font-size: 23px;
 }
 
-/* BUTTONS */
+/* =========================================
+   BUTTONS
+========================================= */
+
 .admin-primary-btn,
 .admin-outline-btn {
   min-height: 40px;
@@ -474,7 +496,10 @@
   border-color: #9bb6a2;
 }
 
-/* OVERVIEW SUMMARY */
+/* =========================================
+   OVERVIEW SUMMARY
+========================================= */
+
 .admin-overview-summary {
   margin-bottom: 22px;
 }
@@ -545,7 +570,10 @@
   font-size: 17px;
 }
 
-/* MANAGEMENT TOOLBAR */
+/* =========================================
+   MANAGEMENT TOOLBAR
+========================================= */
+
 .admin-management-toolbar {
   display: flex;
   align-items: center;
@@ -592,7 +620,10 @@
   font-size: 11px;
 }
 
-/* RESTAURANT CARDS */
+/* =========================================
+   RESTAURANT CARDS
+========================================= */
+
 .admin-restaurant-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
@@ -620,7 +651,6 @@
   box-shadow: 0 12px 28px rgba(23,61,48,.09);
 }
 
-/* Card image */
 .admin-restaurant-image {
   position: relative;
   width: 100%;
@@ -641,7 +671,6 @@
   transform: scale(1.035);
 }
 
-/* Fallback if no image exists */
 .admin-restaurant-image-fallback {
   width: 100%;
   height: 100%;
@@ -664,7 +693,6 @@
   letter-spacing: normal;
 }
 
-/* Single approval badge on image */
 .admin-image-status {
   position: absolute;
   top: 13px;
@@ -685,7 +713,6 @@
   color: #95691f;
 }
 
-/* Card title and description */
 .admin-restaurant-card-top {
   display: block;
   margin: 0;
@@ -716,7 +743,6 @@
   line-height: 1.65;
 }
 
-/* Details */
 .admin-restaurant-details {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -767,7 +793,6 @@
   border-bottom: 0;
 }
 
-/* Approve action */
 .admin-restaurant-card-actions {
   display: flex;
   justify-content: flex-end;
@@ -775,7 +800,10 @@
   padding: 0 21px 20px;
 }
 
-/* OWNER FORM */
+/* =========================================
+   RESTAURANT OWNER FORM
+========================================= */
+
 .admin-owner-form {
   margin-bottom: 25px;
   padding: 22px;
@@ -836,7 +864,10 @@
   box-shadow: 0 0 0 3px rgba(54,119,77,.09);
 }
 
-/* OWNER CARDS */
+/* =========================================
+   OWNER CARDS
+========================================= */
+
 .admin-owner-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0,1fr));
@@ -924,7 +955,10 @@
   margin-top: 20px;
 }
 
-/* EMPTY STATES */
+/* =========================================
+   EMPTY STATES
+========================================= */
+
 .admin-empty-state {
   padding: 45px 15px;
   border: 1px dashed #d9e1d5;
@@ -961,7 +995,10 @@
   padding: 65px 15px;
 }
 
-/* FOOTER */
+/* =========================================
+   FOOTER
+========================================= */
+
 .admin-page-footer {
   display: flex;
   justify-content: space-between;
@@ -974,12 +1011,329 @@
   font-size: 11px;
 }
 
-/* MOBILE SIDEBAR OVERLAY */
+/* =========================================
+   ADMIN ALL ORDERS - CLEAN DESIGN
+========================================= */
+
+/* Summary cards */
+
+.admin-order-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.admin-order-summary article {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 21px;
+  background: #fff;
+  border: 1px solid #e8ece8;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(25,55,35,.035);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.admin-order-summary article:hover {
+  border-color: #d2dfd4;
+  box-shadow: 0 5px 14px rgba(25,55,35,.06);
+}
+
+.admin-order-summary article span {
+  color: #78867c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-order-summary article strong {
+  color: #173d30;
+  font-size: 27px;
+  font-weight: 750;
+}
+
+/* Search and filters */
+
+.admin-orders-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) minmax(150px, 1fr) minmax(150px, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 15px;
+  margin: 22px 0 15px;
+  background: #fff;
+  border: 1px solid #e8ece8;
+  border-radius: 12px;
+}
+
+.admin-orders-toolbar input,
+.admin-orders-toolbar select {
+  width: 100%;
+  min-width: 0;
+  height: 43px;
+  padding: 0 12px;
+  color: #304338;
+  background: #fff;
+  border: 1px solid #dfe6df;
+  border-radius: 8px;
+  outline: none;
+  font: inherit;
+  font-size: 12px;
+}
+
+.admin-orders-toolbar input:focus,
+.admin-orders-toolbar select:focus {
+  border-color: #628c70;
+  box-shadow: 0 0 0 3px rgba(40,110,65,.08);
+}
+
+.admin-orders-toolbar input::placeholder {
+  color: #9aa79e;
+}
+
+.admin-orders-toolbar button {
+  min-height: 43px;
+  white-space: nowrap;
+}
+
+.admin-orders-result-count {
+  margin: 15px 2px;
+  color: #7c8980;
+  font-size: 12px;
+}
+
+/* Orders list */
+
+.admin-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Individual order card */
+
+.admin-order-card {
+  min-width: 0;
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid #e6ebe6;
+  border-radius: 12px;
+  box-shadow: 0 2px 9px rgba(25,55,35,.035);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.admin-order-card:hover {
+  border-color: #cbd9ce;
+  box-shadow: 0 5px 15px rgba(25,55,35,.06);
+}
+
+/* Order card header */
+
+.admin-order-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 15px;
+  margin-bottom: 19px;
+  border-bottom: 1px solid #edf0ed;
+}
+
+.admin-order-card-header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.admin-order-id-label {
+  color: #89958d;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.admin-order-card-header > div strong {
+  color: #173d30;
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: .3px;
+}
+
+/* Order status */
+
+.admin-order-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 6px 11px;
+  border-radius: 20px;
+  color: #66736a;
+  background: #f0f3f0;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+
+.admin-order-status.placed,
+.admin-order-status.pending {
+  color: #956600;
+  background: #fff5df;
+}
+
+.admin-order-status.confirmed,
+.admin-order-status.preparing {
+  color: #2860a5;
+  background: #eaf1fc;
+}
+
+.admin-order-status.ready {
+  color: #7144a8;
+  background: #f1eafa;
+}
+
+.admin-order-status.out-for-delivery {
+  color: #0876a9;
+  background: #e7f5fc;
+}
+
+.admin-order-status.delivered {
+  color: #197747;
+  background: #e8f5ec;
+}
+
+.admin-order-status.cancelled {
+  color: #bd4141;
+  background: #fcecec;
+}
+
+/* Order information grid */
+
+.admin-order-card-body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px 20px;
+  padding: 2px 0 19px;
+}
+
+.admin-order-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.admin-order-detail > span {
+  color: #89958d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-order-detail > strong {
+  color: #304338;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.admin-order-detail > small {
+  color: #849087;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.admin-order-amount {
+  color: #19804b !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+}
+
+/* Payment status */
+
+.admin-payment-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 6px 11px;
+  border-radius: 20px;
+  color: #66736a !important;
+  background: #f0f2f0;
+  font-size: 10px !important;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.admin-payment-status.paid {
+  color: #197747 !important;
+  background: #e8f5ec;
+}
+
+.admin-payment-status.pending {
+  color: #956600 !important;
+  background: #fff5df;
+}
+
+.admin-payment-status.failed {
+  color: #bd4141 !important;
+  background: #fcecec;
+}
+
+.admin-payment-status.refunded {
+  color: #2860a5 !important;
+  background: #eaf1fc;
+}
+
+/* Order items */
+
+.admin-order-items {
+  padding: 13px 15px;
+  background: #f8faf8;
+  border: 1px solid #edf0ed;
+  border-radius: 9px;
+}
+
+.admin-order-items > strong {
+  display: block;
+  margin-bottom: 9px;
+  color: #385443;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-order-items > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.admin-order-items > div span {
+  padding: 6px 9px;
+  color: #5d6e62;
+  background: #fff;
+  border: 1px solid #e7ece7;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* =========================================
+   MOBILE SIDEBAR OVERLAY
+========================================= */
+
 .admin-sidebar-overlay {
   display: none;
 }
 
-/* RESPONSIVE */
+/* =========================================
+   RESPONSIVE - TABLET
+========================================= */
+
 @media (max-width: 1100px) {
   .admin-stats-grid {
     grid-template-columns: repeat(2, minmax(0,1fr));
@@ -989,6 +1343,24 @@
     padding: 26px 22px;
   }
 }
+
+@media (max-width: 1000px) {
+  .admin-order-summary {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .admin-orders-toolbar {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .admin-order-card-body {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+}
+
+/* =========================================
+   RESPONSIVE - MOBILE
+========================================= */
 
 @media (max-width: 760px) {
   .admin-layout {
@@ -1079,7 +1451,7 @@
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 600px) {
   .admin-stats-grid {
     grid-template-columns: repeat(2, minmax(0,1fr));
     gap: 10px;
@@ -1161,5 +1533,62 @@
 
   .admin-page-footer {
     font-size: 10px;
+  }
+
+  /* Orders on mobile */
+
+  .admin-order-summary {
+    gap: 10px;
+  }
+
+  .admin-order-summary article {
+    padding: 15px;
+  }
+
+  .admin-order-summary article strong {
+    font-size: 23px;
+  }
+
+  .admin-orders-toolbar {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .admin-orders-toolbar input,
+  .admin-orders-toolbar select,
+  .admin-orders-toolbar button {
+    width: 100%;
+  }
+
+  .admin-order-card {
+    padding: 15px;
+  }
+
+  .admin-order-card-header {
+    align-items: flex-start;
+  }
+
+  .admin-order-status {
+    font-size: 9px;
+    padding: 6px 9px;
+  }
+
+  .admin-order-card-body {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 17px 12px;
+  }
+
+  .admin-order-detail > strong {
+    font-size: 12px;
+  }
+
+  .admin-order-items {
+    padding: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .admin-order-card-body {
+    grid-template-columns: 1fr;
   }
 }
