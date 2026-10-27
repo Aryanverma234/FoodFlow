@@ -471,6 +471,7 @@ const updateOrderStatus = async (req, res) => {
       "READY",
       "OUT_FOR_DELIVERY",
       "DELIVERED",
+      "CANCELLED",
     ];
 
     if (!orderStatus) {
@@ -525,6 +526,9 @@ const updateOrderStatus = async (req, res) => {
     }
 
     order.orderStatus = orderStatus;
+    if (orderStatus === "CANCELLED") {
+      order.cancellationReason = req.body.cancellationReason || "Cancelled by restaurant";
+    }
 
     await order.save();
 

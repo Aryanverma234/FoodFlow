@@ -78,7 +78,11 @@ function RestaurantDashboard() {
   const [error, setError] = useState("");
 
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-  const [activeTab, setActiveTab] = useState("categories");
+  const [activeTab, setActiveTab] = useState("orders");
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
+  const [orderFilter, setOrderFilter] = useState("all");
 
   const [categories, setCategories] = useState([]);
   const [categoryForm, setCategoryForm] = useState(initialCategoryForm);
@@ -200,11 +204,84 @@ function RestaurantDashboard() {
   };
 
   // Manage restaurant
+  // Fetch restaurant incoming orders
+  const fetchRestaurantOrders = async (restaurant) => {
+    try {
+      setOrdersLoading(true);
+      const target = restaurant || selectedRestaurant;
+      if (!target) return;
+
+      const response = await axios.get(
+        `${API_URL}/orders/restaurant/${target._id}`,
+        { headers: authHeaders }
+      );
+
+      setOrders(response.data.orders || []);
+    } catch (err) {
+      console.error("Orders fetch error:", err);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  // Update order status (pipeline)
+  const handleUpdateOrderStatus = async (orderId, newStatus, reason) => {
+    try {
+      setUpdatingOrderId(orderId);
+      setMessage("");
+      setError("");
+
+      const payload = { orderStatus: newStatus };
+      if (reason) payload.cancellationReason = reason;
+
+      const response = await axios.patch(
+        `${API_URL}/orders/${orderId}/status`,
+        payload,
+        { headers: authHeaders }
+      );
+
+      setMessage(
+        response.data.message || `Order status updated to ${newStatus}!`
+      );
+
+      if (selectedRestaurant) {
+        await fetchRestaurantOrders(selectedRestaurant);
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Order status update nahi ho paya."
+      );
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  const formatOrderDate = (date) => {
+    if (!date) return "Date unavailable";
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return "Date unavailable";
+    return d.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatCurrency = (amt) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(amt ?? 0);
+
   const handleManageRestaurant = async (restaurant) => {
     setSelectedRestaurant(restaurant);
-    setActiveTab("categories");
+    setActiveTab("orders");
+    setOrders([]);
     setCategories([]);
     setFoodItems([]);
+    setOrders([]);
     setCategoryForm(initialCategoryForm);
     setFoodForm(initialFoodForm);
     setFoodEditingId(null);
@@ -213,6 +290,7 @@ function RestaurantDashboard() {
     setError("");
 
     await Promise.all([
+      fetchRestaurantOrders(restaurant),
       fetchCategories(restaurant),
       fetchFoodItems(restaurant),
     ]);
@@ -425,12 +503,27 @@ function RestaurantDashboard() {
     setSelectedRestaurant(null);
     setCategories([]);
     setFoodItems([]);
+    setOrders([]);
     setFoodEditingId(null);
     setOpenFoodMenuId(null);
     setFoodForm(initialFoodForm);
     setMessage("");
     setError("");
   };
+
+  const activeOrdersCount = orders.filter(
+    (o) => o.orderStatus !== "DELIVERED" && o.orderStatus !== "CANCELLED"
+  ).length;
+
+  const filteredOrders = orders.filter((o) => {
+    if (orderFilter === "new") return o.orderStatus === "PLACED";
+    if (orderFilter === "kitchen")
+      return ["CONFIRMED", "PREPARING", "READY"].includes(o.orderStatus);
+    if (orderFilter === "delivery") return o.orderStatus === "OUT_FOR_DELIVERY";
+    if (orderFilter === "delivered") return o.orderStatus === "DELIVERED";
+    if (orderFilter === "cancelled") return o.orderStatus === "CANCELLED";
+    return true;
+  });
 
   return (
     <main className="restaurant-dashboard">
@@ -665,13 +758,27 @@ function RestaurantDashboard() {
           <div className="rd-tabs">
             <button
               type="button"
+              className={activeTab === "orders" ? "active" : ""}
+              onClick={() => {
+                setActiveTab("orders");
+                setOpenFoodMenuId(null);
+                if (selectedRestaurant) fetchRestaurantOrders(selectedRestaurant);
+              }}
+            >
+              🛍️ Incoming Orders
+              {activeOrdersCount > 0 && (
+                <span className="rd-badge-count">{activeOrdersCount}</span>
+              )}
+            </button>
+            <button
+              type="button"
               className={activeTab === "categories" ? "active" : ""}
               onClick={() => {
                 setActiveTab("categories");
                 setOpenFoodMenuId(null);
               }}
             >
-              📂 Categories
+              📂 Categories ({categories.length})
             </button>
 
             <button
@@ -679,9 +786,315 @@ function RestaurantDashboard() {
               className={activeTab === "food" ? "active" : ""}
               onClick={() => setActiveTab("food")}
             >
-              🍔 Food Items
+              🍔 Food Items ({foodItems.length})
             </button>
           </div>
+
+          {/* Orders Tab */}
+          {activeTab === "orders" && (
+            <div className="rd-tab-content">
+              <div className="rd-orders-topbar">
+                <div className="rd-subheading" style={{ margin: 0 }}>
+                  <h3>Kitchen & Delivery Orders</h3>
+                  <p>Accept incoming orders, manage food preparation, and track dispatch.</p>
+                </div>
+
+                <button
+                  type="button"
+                  className="rd-refresh-orders-btn"
+                  onClick={() => fetchRestaurantOrders(selectedRestaurant)}
+                  disabled={ordersLoading}
+                >
+                  <span className={ordersLoading ? "spinning" : ""}>↻</span>
+                  {ordersLoading ? "Refreshing..." : "Refresh Orders"}
+                </button>
+              </div>
+
+              {/* Order Status Filters */}
+              <div className="rd-order-filters">
+                <button
+                  type="button"
+                  className={orderFilter === "all" ? "active" : ""}
+                  onClick={() => setOrderFilter("all")}
+                >
+                  All ({orders.length})
+                </button>
+                <button
+                  type="button"
+                  className={orderFilter === "new" ? "active" : ""}
+                  onClick={() => setOrderFilter("new")}
+                >
+                  ⚡ New ({orders.filter((o) => o.orderStatus === "PLACED").length})
+                </button>
+                <button
+                  type="button"
+                  className={orderFilter === "kitchen" ? "active" : ""}
+                  onClick={() => setOrderFilter("kitchen")}
+                >
+                  🍳 In Kitchen (
+                  {
+                    orders.filter((o) =>
+                      ["CONFIRMED", "PREPARING", "READY"].includes(o.orderStatus)
+                    ).length
+                  }
+                  )
+                </button>
+                <button
+                  type="button"
+                  className={orderFilter === "delivery" ? "active" : ""}
+                  onClick={() => setOrderFilter("delivery")}
+                >
+                  🛵 Delivery (
+                  {
+                    orders.filter((o) => o.orderStatus === "OUT_FOR_DELIVERY")
+                      .length
+                  }
+                  )
+                </button>
+                <button
+                  type="button"
+                  className={orderFilter === "delivered" ? "active" : ""}
+                  onClick={() => setOrderFilter("delivered")}
+                >
+                  ✓ Delivered (
+                  {orders.filter((o) => o.orderStatus === "DELIVERED").length})
+                </button>
+                <button
+                  type="button"
+                  className={orderFilter === "cancelled" ? "active" : ""}
+                  onClick={() => setOrderFilter("cancelled")}
+                >
+                  ✕ Cancelled (
+                  {orders.filter((o) => o.orderStatus === "CANCELLED").length})
+                </button>
+              </div>
+
+              {ordersLoading && orders.length === 0 ? (
+                <div className="rd-empty">Loading orders...</div>
+              ) : filteredOrders.length === 0 ? (
+                <div className="rd-empty">
+                  {orderFilter === "all"
+                    ? "No orders received yet for this restaurant."
+                    : `No orders matching '${orderFilter}' filter.`}
+                </div>
+              ) : (
+                <div className="rd-orders-grid">
+                  {filteredOrders.map((order) => {
+                    const isBusy = updatingOrderId === order._id;
+                    const isCod = order.paymentMethod === "COD";
+                    const isPaid =
+                      order.paymentStatus === "PAID" ||
+                      order.paymentStatus === "SUCCESS";
+
+                    return (
+                      <article
+                        className={`rd-order-card ${
+                          order.orderStatus === "PLACED" ? "new-alert" : ""
+                        }`}
+                        key={order._id}
+                      >
+                        {/* Header */}
+                        <div className="rd-order-header">
+                          <div>
+                            <div className="rd-order-id-row">
+                              <strong>#{order.orderNumber || order._id}</strong>
+                              <span
+                                className={`rd-order-status-badge status-${order.orderStatus.toLowerCase()}`}
+                              >
+                                {order.orderStatus.replaceAll("_", " ")}
+                              </span>
+                            </div>
+                            <span className="rd-order-time">
+                              🕒 {formatOrderDate(order.createdAt)}
+                            </span>
+                          </div>
+
+                          <div className="rd-order-payment-box">
+                            <span className="payment-type">
+                              {isCod ? "💵 Cash on Delivery" : "💳 Online Payment"}
+                            </span>
+                            <span
+                              className={`payment-pill ${
+                                isPaid ? "paid" : "pending"
+                              }`}
+                            >
+                              {isPaid
+                                ? "PAID"
+                                : isCod
+                                ? "COLLECT CASH"
+                                : "PAYMENT PENDING"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Customer & Address Details */}
+                        <div className="rd-order-customer">
+                          <div className="cust-info">
+                            <strong>👤 {order.user?.name || "Customer"}</strong>
+                            {order.user?.phone && (
+                              <a
+                                href={`tel:${order.user.phone}`}
+                                className="cust-phone"
+                              >
+                                📞 {order.user.phone}
+                              </a>
+                            )}
+                          </div>
+
+                          {order.deliveryAddress && (
+                            <p className="cust-addr">
+                              📍 {order.deliveryAddress.fullName} •{" "}
+                              {order.deliveryAddress.addressLine1}
+                              {order.deliveryAddress.city
+                                ? `, ${order.deliveryAddress.city}`
+                                : ""}
+                              {order.deliveryAddress.phone
+                                ? ` (Phone: ${order.deliveryAddress.phone})`
+                                : ""}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Order Items */}
+                        <div className="rd-order-items-box">
+                          <h4>Ordered Items</h4>
+                          <ul className="rd-order-items-list">
+                            {order.items?.map((item, idx) => (
+                              <li key={item._id || idx}>
+                                <span className="item-name-qty">
+                                  <strong>{item.quantity}×</strong> {item.name}
+                                </span>
+                                <span className="item-price">
+                                  {formatCurrency(
+                                    item.subtotal ||
+                                      (item.price || 0) * (item.quantity || 1)
+                                  )}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <div className="rd-order-total-row">
+                            <span>Order Total</span>
+                            <strong>{formatCurrency(order.total)}</strong>
+                          </div>
+                        </div>
+
+                        {/* Actions Pipeline */}
+                        <div className="rd-order-actions-bar">
+                          {order.orderStatus === "PLACED" && (
+                            <div className="action-buttons-group">
+                              <button
+                                type="button"
+                                className="rd-btn-accept"
+                                onClick={() =>
+                                  handleUpdateOrderStatus(order._id, "CONFIRMED")
+                                }
+                                disabled={isBusy}
+                              >
+                                {isBusy ? "Updating..." : "✓ Accept & Confirm"}
+                              </button>
+                              <button
+                                type="button"
+                                className="rd-btn-reject"
+                                onClick={() => {
+                                  const reason = window.prompt(
+                                    "Reason for rejecting this order?",
+                                    "Item out of stock"
+                                  );
+                                  if (reason !== null) {
+                                    handleUpdateOrderStatus(
+                                      order._id,
+                                      "CANCELLED",
+                                      reason
+                                    );
+                                  }
+                                }}
+                                disabled={isBusy}
+                              >
+                                Reject Order
+                              </button>
+                            </div>
+                          )}
+
+                          {order.orderStatus === "CONFIRMED" && (
+                            <button
+                              type="button"
+                              className="rd-btn-pipeline"
+                              onClick={() =>
+                                handleUpdateOrderStatus(order._id, "PREPARING")
+                              }
+                              disabled={isBusy}
+                            >
+                              {isBusy ? "Updating..." : "🍳 Start Cooking (Preparing)"}
+                            </button>
+                          )}
+
+                          {order.orderStatus === "PREPARING" && (
+                            <button
+                              type="button"
+                              className="rd-btn-pipeline"
+                              onClick={() =>
+                                handleUpdateOrderStatus(order._id, "READY")
+                              }
+                              disabled={isBusy}
+                            >
+                              {isBusy ? "Updating..." : "🥡 Food is Ready for Pickup"}
+                            </button>
+                          )}
+
+                          {order.orderStatus === "READY" && (
+                            <button
+                              type="button"
+                              className="rd-btn-pipeline"
+                              onClick={() =>
+                                handleUpdateOrderStatus(
+                                  order._id,
+                                  "OUT_FOR_DELIVERY"
+                                )
+                              }
+                              disabled={isBusy}
+                            >
+                              {isBusy
+                                ? "Updating..."
+                                : "🛵 Handover / Out for Delivery"}
+                            </button>
+                          )}
+
+                          {order.orderStatus === "OUT_FOR_DELIVERY" && (
+                            <button
+                              type="button"
+                              className="rd-btn-complete"
+                              onClick={() =>
+                                handleUpdateOrderStatus(order._id, "DELIVERED")
+                              }
+                              disabled={isBusy}
+                            >
+                              {isBusy ? "Updating..." : "✨ Complete Delivery"}
+                            </button>
+                          )}
+
+                          {order.orderStatus === "DELIVERED" && (
+                            <span className="rd-status-final delivered">
+                              ✓ Order Successfully Delivered
+                            </span>
+                          )}
+
+                          {order.orderStatus === "CANCELLED" && (
+                            <span className="rd-status-final cancelled">
+                              ✕ Order Cancelled{" "}
+                              {order.cancellationReason &&
+                                `(${order.cancellationReason})`}
+                            </span>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Categories Tab */}
           {activeTab === "categories" && (
