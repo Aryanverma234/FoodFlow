@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import "./MyOrders.css";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:5000/api";
 
 function MyOrders() {
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
@@ -128,12 +130,15 @@ function MyOrders() {
               }
             );
 
-            setMessage(
-              verification.data.message ||
-                "Payment verified successfully!"
-            );
-
-            await fetchMyOrders();
+           navigate("/order-success", {
+  state: {
+    order: verification.data.order || {
+      _id: selectedOrderId,
+    },
+    paymentMethod: "ONLINE",
+    paymentStatus: "PAID",
+  },
+});
           } catch (error) {
             setMessage(
               error.response?.data?.message ||

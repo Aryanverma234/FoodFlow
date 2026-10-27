@@ -24,6 +24,7 @@ import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import RestaurantDashboard from "./pages/RestaurantDashboard";
 import Footer from "./Footer";
+import OrderSuccess from "./pages/OrderSuccess";
 
 import "./App.css";
 
@@ -37,6 +38,7 @@ function App() {
   );
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navbarVisible, setNavbarVisible] = useState(true);
 
   const isAdmin = user?.role === "admin";
   const isRestaurant = user?.role === "restaurant";
@@ -47,11 +49,44 @@ function App() {
       ? "/restaurant/dashboard"
       : "/";
 
+  // Theme management
   useEffect(() => {
     const theme = darkMode ? "dark" : "light";
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("foodflow-theme", theme);
   }, [darkMode]);
+
+  // Smart auto-hide navbar
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDifference = currentScrollY - lastScrollY;
+
+      if (currentScrollY <= 10) {
+        setNavbarVisible(true);
+      } else if (menuOpen) {
+        setNavbarVisible(true);
+      } else if (scrollDifference > 5) {
+        // Scrolling down: hide navbar
+        setNavbarVisible(false);
+      } else if (scrollDifference < -5) {
+        // Scrolling up: show navbar
+        setNavbarVisible(true);
+      }
+
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [menuOpen]);
 
   const toggleTheme = () => {
     setDarkMode((previous) => !previous);
@@ -61,23 +96,26 @@ function App() {
     setMenuOpen(false);
   };
 
- const handleLogout = () => {
-  // Clear saved login details
-  localStorage.removeItem("foodflow_token");
-  localStorage.removeItem("foodflow_user");
+  const handleLogout = () => {
+    localStorage.removeItem("foodflow_token");
+    localStorage.removeItem("foodflow_user");
 
-  // Clear React authentication state
-  setToken("");
-  setUser(null);
-  setMenuOpen(false);
+    setToken("");
+    setUser(null);
+    setMenuOpen(false);
 
-  // Open login page
-  window.location.replace("/login");
-};
+    window.location.replace("/login");
+  };
 
   return (
     <>
-      <nav className="navbar">
+      <nav
+        className={`navbar ${
+          navbarVisible || menuOpen
+            ? "navbar-visible"
+            : "navbar-hidden"
+        }`}
+      >
         <Link
           to={dashboardPath}
           className="logo"
@@ -175,7 +213,9 @@ function App() {
               type="button"
               className="theme-toggle"
               onClick={toggleTheme}
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label={
+                darkMode ? "Switch to light mode" : "Switch to dark mode"
+              }
             >
               {darkMode ? "☀️ Light" : "🌙 Dark"}
             </button>
@@ -184,7 +224,6 @@ function App() {
       </nav>
 
       <Routes>
-        {/* Home */}
         <Route
           path="/"
           element={
@@ -194,7 +233,6 @@ function App() {
           }
         />
 
-        {/* Admin Dashboard */}
         <Route
           path="/admin/dashboard"
           element={
@@ -204,7 +242,6 @@ function App() {
           }
         />
 
-        {/* Restaurant Owner Dashboard */}
         <Route
           path="/restaurant/dashboard"
           element={
@@ -214,7 +251,6 @@ function App() {
           }
         />
 
-        {/* Customer Pages */}
         <Route
           path="/restaurants"
           element={
@@ -247,7 +283,10 @@ function App() {
           element={
             token && !isAdmin && !isRestaurant
               ? <Checkout />
-              : <Navigate to={dashboardPath === "/" ? "/login" : dashboardPath} replace />
+              : <Navigate
+                  to={dashboardPath === "/" ? "/login" : dashboardPath}
+                  replace
+                />
           }
         />
 
@@ -256,7 +295,10 @@ function App() {
           element={
             token && !isAdmin && !isRestaurant
               ? <Address />
-              : <Navigate to={dashboardPath === "/" ? "/login" : dashboardPath} replace />
+              : <Navigate
+                  to={dashboardPath === "/" ? "/login" : dashboardPath}
+                  replace
+                />
           }
         />
 
@@ -265,7 +307,10 @@ function App() {
           element={
             token && !isAdmin && !isRestaurant
               ? <Settings darkMode={darkMode} toggleTheme={toggleTheme} />
-              : <Navigate to={dashboardPath === "/" ? "/login" : dashboardPath} replace />
+              : <Navigate
+                  to={dashboardPath === "/" ? "/login" : dashboardPath}
+                  replace
+                />
           }
         />
 
@@ -274,11 +319,23 @@ function App() {
           element={
             token && !isAdmin && !isRestaurant
               ? <MyOrders />
-              : <Navigate to={dashboardPath === "/" ? "/login" : dashboardPath} replace />
+              : <Navigate
+                  to={dashboardPath === "/" ? "/login" : dashboardPath}
+                  replace
+                />
           }
         />
-
-        {/* Authentication */}
+<Route
+  path="/order-success"
+  element={
+    token && !isAdmin && !isRestaurant
+      ? <OrderSuccess />
+      : <Navigate
+          to={dashboardPath === "/" ? "/login" : dashboardPath}
+          replace
+        />
+  }
+/>
         <Route
           path="/login"
           element={
@@ -297,7 +354,6 @@ function App() {
           }
         />
 
-        {/* Invalid Route */}
         <Route
           path="*"
           element={<Navigate to={dashboardPath} replace />}

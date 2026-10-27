@@ -648,3 +648,22 @@ a {
   font-size: 16px;
   font-weight: 800;
 }
+
+/* =================================
+   SMART AUTO-HIDE NAVBAR
+================================= */
+
+.navbar {
+  z-index: 1000;
+  transition: transform 0.3s ease-in-out;
+  will-change: transform;
+}
+
+.navbar-visible {
+  transform: translateY(0);
+}
+
+.navbar-hidden {
+  transform: translateY(-110%);
+  pointer-events: none;
+}

@@ -82,15 +82,25 @@ function Checkout() {
       );
 
       if (response.data.success) {
+        const placedOrder = response.data.order || response.data;
+
         await loadCart();
-        navigate("/orders", {
-          state: {
-            message:
-              paymentMethod === "ONLINE"
-                ? "Order placed! Complete your payment using Pay Now."
-                : "Your order has been placed successfully!",
-          },
-        });
+
+        if (paymentMethod === "ONLINE") {
+          navigate("/orders", {
+            state: {
+              message:
+                "Order placed! Complete your payment using Pay Now.",
+            },
+          });
+        } else {
+          navigate("/order-success", {
+            state: {
+              order: placedOrder,
+              paymentMethod: "COD",
+            },
+          });
+        }
       }
     } catch (err) {
       setError(
@@ -159,9 +169,7 @@ function Checkout() {
                     <label
                       key={address._id}
                       className={`checkout-address-option ${
-                        selectedAddress === address._id
-                          ? "selected"
-                          : ""
+                        selectedAddress === address._id ? "selected" : ""
                       }`}
                     >
                       <input
@@ -169,23 +177,21 @@ function Checkout() {
                         name="deliveryAddress"
                         value={address._id}
                         checked={selectedAddress === address._id}
-                        onChange={() =>
-                          setSelectedAddress(address._id)
-                        }
+                        onChange={() => setSelectedAddress(address._id)}
                       />
 
                       <span className="checkout-custom-radio" />
 
                       <div className="checkout-address-content">
                         <div className="checkout-address-title">
-                          <strong>
-                            {address.label || "Address"}
-                          </strong>
+                          <strong>{address.label || "Address"}</strong>
+
                           {address.isDefault && (
                             <span className="checkout-default-tag">
                               DEFAULT
                             </span>
                           )}
+
                           {selectedAddress === address._id && (
                             <span className="checkout-selected-tag">
                               SELECTED
@@ -203,8 +209,7 @@ function Checkout() {
                         </p>
 
                         <p>
-                          {address.city}, {address.state} -{" "}
-                          {address.pincode}
+                          {address.city}, {address.state} - {address.pincode}
                         </p>
 
                         {address.landmark && (
@@ -252,11 +257,14 @@ function Checkout() {
                   checked={paymentMethod === "COD"}
                   onChange={() => setPaymentMethod("COD")}
                 />
+
                 <span className="checkout-payment-icon">💵</span>
+
                 <span className="checkout-payment-text">
                   <strong>Cash on Delivery</strong>
                   <small>Pay when your order arrives</small>
                 </span>
+
                 <span className="checkout-custom-radio" />
               </label>
 
@@ -272,11 +280,14 @@ function Checkout() {
                   checked={paymentMethod === "ONLINE"}
                   onChange={() => setPaymentMethod("ONLINE")}
                 />
+
                 <span className="checkout-payment-icon">💳</span>
+
                 <span className="checkout-payment-text">
                   <strong>Online Payment</strong>
                   <small>Secure payment with Razorpay</small>
                 </span>
+
                 <span className="checkout-custom-radio" />
               </label>
             </div>
@@ -296,6 +307,7 @@ function Checkout() {
                   <strong>{item.name}</strong>
                   <span>Qty: {item.quantity}</span>
                 </div>
+
                 <strong>
                   ₹{Number(item.price) * Number(item.quantity)}
                 </strong>
@@ -332,8 +344,7 @@ function Checkout() {
             <div className="checkout-delivery-preview">
               <span>📍 Delivering to</span>
               <strong>
-                {selectedAddressData.label} ·{" "}
-                {selectedAddressData.city}
+                {selectedAddressData.label} · {selectedAddressData.city}
               </strong>
             </div>
           )}

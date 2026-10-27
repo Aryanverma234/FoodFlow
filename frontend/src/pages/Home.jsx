@@ -6,12 +6,59 @@ import "./Home.css";
 const API_URL = "http://localhost:5000/api";
 
 const categories = [
-  { emoji: "🍕", name: "Pizza" },
-  { emoji: "🍔", name: "Burgers" },
-  { emoji: "🍜", name: "Noodles" },
-  { emoji: "🍛", name: "Biryani" },
-  { emoji: "🥗", name: "Healthy Food" },
-  { emoji: "🍰", name: "Desserts" },
+  {
+    name: "Pizza",
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=700&q=85",
+  },
+  {
+    name: "Burgers",
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=700&q=85",
+  },
+  {
+    name: "Noodles",
+    image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=700&q=85",
+  },
+  {
+    name: "Biryani",
+    image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=700&q=85",
+  },
+  {
+    name: "Healthy Food",
+    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=700&q=85",
+  },
+  {
+    name: "Desserts",
+    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=700&q=85",
+  },
+];
+
+// HERO SLIDER IMAGES
+const heroSlides = [
+  {
+    image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1400&q=90",
+    title: "Made for food lovers",
+    subtitle: "A little joy in every bite",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1400&q=90",
+    title: "Pizza perfection",
+    subtitle: "Freshly baked happiness",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1400&q=90",
+    title: "Burger cravings",
+    subtitle: "Big flavours, bigger smiles",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=1400&q=90",
+    title: "The taste of India",
+    subtitle: "Delicious biryani moments",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1400&q=90",
+    title: "Explore new flavours",
+    subtitle: "Something special in every bowl",
+  },
 ];
 
 // Cuisine ke hisaab se default restaurant image
@@ -59,7 +106,18 @@ function Home() {
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
   const [restaurantError, setRestaurantError] = useState("");
   const [search, setSearch] = useState("");
+  const [activeSlide, setActiveSlide] = useState(0);
 
+  // Automatic hero slider
+  useEffect(() => {
+    const sliderTimer = setInterval(() => {
+      setActiveSlide((previous) => (previous + 1) % heroSlides.length);
+    }, 4000);
+
+    return () => clearInterval(sliderTimer);
+  }, []);
+
+  // Fetch restaurants
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
@@ -83,6 +141,7 @@ function Home() {
     fetchRestaurants();
   }, []);
 
+  // Restaurant search
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const query = search.toLowerCase().trim();
 
@@ -97,10 +156,25 @@ function Home() {
     return name.includes(query) || cuisine.includes(query);
   });
 
+  // Slider controls
+  const showPreviousSlide = () => {
+    setActiveSlide(
+      (previous) => (previous - 1 + heroSlides.length) % heroSlides.length
+    );
+  };
+
+  const showNextSlide = () => {
+    setActiveSlide(
+      (previous) => (previous + 1) % heroSlides.length
+    );
+  };
+
   return (
     <main className="home-page">
+
       {/* HERO SECTION */}
       <section className="home-hero">
+
         <div className="hero-content">
           <span className="hero-badge">
             <span>✦</span> THE ART OF GOOD FOOD
@@ -145,27 +219,67 @@ function Home() {
           </div>
         </div>
 
+        {/* HERO IMAGE SLIDER */}
         <div className="hero-food-art">
+
           <img
-            src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1400&q=90"
-            alt="Beautifully presented gourmet food"
+            key={activeSlide}
+            src={heroSlides[activeSlide].image}
+            alt={heroSlides[activeSlide].title}
           />
 
           <div className="hero-image-caption">
             <span>✦</span>
 
             <div>
-              <strong>Made for food lovers</strong>
-              <small>A little joy in every bite</small>
+              <strong>{heroSlides[activeSlide].title}</strong>
+              <small>{heroSlides[activeSlide].subtitle}</small>
             </div>
           </div>
 
-          <div className="hero-image-number">01 / FOODFLOW</div>
+          <div className="hero-image-number">
+            {String(activeSlide + 1).padStart(2, "0")} / FOODFLOW
+          </div>
+
+          {/* Previous button */}
+          <button
+            type="button"
+            className="hero-slider-arrow hero-slider-prev"
+            onClick={showPreviousSlide}
+            aria-label="Previous image"
+          >
+            &#8249;
+          </button>
+
+          {/* Next button */}
+          <button
+            type="button"
+            className="hero-slider-arrow hero-slider-next"
+            onClick={showNextSlide}
+            aria-label="Next image"
+          >
+            &#8250;
+          </button>
+
+          {/* Slider dots */}
+          <div className="hero-slider-dots">
+            {heroSlides.map((slide, index) => (
+              <button
+                type="button"
+                key={index}
+                className={activeSlide === index ? "active" : ""}
+                onClick={() => setActiveSlide(index)}
+                aria-label={`Go to image ${index + 1}`}
+              />
+            ))}
+          </div>
+
         </div>
       </section>
 
       {/* CATEGORIES SECTION */}
       <section className="home-section categories-section">
+
         <div className="section-heading">
           <div>
             <span className="section-eyebrow">A WORLD OF FLAVOURS</span>
@@ -188,16 +302,21 @@ function Home() {
               className="category-card"
               key={category.name}
             >
-              <span className="category-emoji">
-                {category.emoji}
-              </span>
+              <img
+                src={category.image}
+                alt={category.name}
+                className="category-image"
+                loading="lazy"
+              />
 
-              <span>{category.name}</span>
-
-              <span className="category-arrow">↗</span>
+              <div className="category-overlay">
+                <h3>{category.name}</h3>
+                <span className="category-arrow">↗</span>
+              </div>
             </Link>
           ))}
         </div>
+
       </section>
 
       {/* RESTAURANTS SECTION */}
@@ -205,6 +324,7 @@ function Home() {
         className="home-section restaurants-section"
         id="restaurants"
       >
+
         <div className="section-heading">
           <div>
             <span className="section-eyebrow">CURATED FOR YOU</span>
@@ -245,11 +365,13 @@ function Home() {
                   className="home-restaurant-card"
                   key={restaurant._id}
                 >
+
                   <Link
                     to={`/menu/${restaurant._id}`}
                     className="restaurant-image-link"
                   >
                     <div className="restaurant-visual">
+
                       <img
                         src={restaurantImage}
                         alt={restaurant.name}
@@ -257,9 +379,7 @@ function Home() {
                         onError={(event) => {
                           event.currentTarget.onerror = null;
                           event.currentTarget.src =
-                            getRestaurantFallbackImage({
-                              cuisine: [],
-                            });
+                            getRestaurantFallbackImage(restaurant);
                         }}
                       />
 
@@ -276,10 +396,12 @@ function Home() {
                       <span className="restaurant-image-index">
                         {String(index + 1).padStart(2, "0")}
                       </span>
+
                     </div>
                   </Link>
 
                   <div className="restaurant-card-content">
+
                     <div className="restaurant-title-row">
                       <h3>{restaurant.name}</h3>
 
@@ -311,16 +433,19 @@ function Home() {
                     >
                       Explore restaurant <span>↗</span>
                     </Link>
+
                   </div>
                 </article>
               );
             })}
           </div>
         )}
+
       </section>
 
       {/* BOTTOM CTA */}
       <section className="home-cta">
+
         <div>
           <span className="section-eyebrow">
             GOOD FOOD, BEAUTIFUL MOMENTS
@@ -340,7 +465,9 @@ function Home() {
         <div className="cta-decoration" aria-hidden="true">
           ✳
         </div>
+
       </section>
+
     </main>
   );
 }

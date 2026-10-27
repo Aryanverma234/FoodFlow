@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
@@ -6,21 +5,29 @@ import "./AdminDashboard.css";
 
 const API_URL = "http://localhost:5000/api";
 
+const menuItems = [
+  { id: "overview", icon: "📊", label: "Overview" },
+  { id: "restaurants", icon: "🏪", label: "Restaurants" },
+  { id: "owners", icon: "👥", label: "Restaurant Owners" },
+  { id: "orders", icon: "🛍️", label: "All Orders" },
+];
+
 function AdminDashboard() {
   const { user, token } = useAuth();
 
   const [restaurants, setRestaurants] = useState([]);
   const [owners, setOwners] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [ownersLoading, setOwnersLoading] = useState(true);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
   const [approvingId, setApprovingId] = useState("");
   const [creatingOwner, setCreatingOwner] = useState(false);
+
   const [showOwnerForm, setShowOwnerForm] = useState(false);
+  const [activeSection, setActiveSection] = useState("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [ownerForm, setOwnerForm] = useState({
     name: "",
@@ -35,9 +42,7 @@ function AdminDashboard() {
     },
   };
 
-  // =====================================
   // FETCH RESTAURANTS
-  // =====================================
   const fetchRestaurants = async () => {
     try {
       setLoading(true);
@@ -49,6 +54,10 @@ function AdminDashboard() {
       );
 
       setRestaurants(response.data.restaurants || []);
+console.log(
+  "FULL RESTAURANT DATA:",
+  JSON.stringify(response.data.restaurants, null, 2)
+);
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -59,9 +68,7 @@ function AdminDashboard() {
     }
   };
 
-  // =====================================
-  // FETCH ALL RESTAURANT OWNERS
-  // =====================================
+  // FETCH RESTAURANT OWNERS
   const fetchOwners = async () => {
     try {
       setOwnersLoading(true);
@@ -89,9 +96,17 @@ function AdminDashboard() {
     }
   }, [token]);
 
-  // =====================================
+  // CHANGE SECTION
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    setSidebarOpen(false);
+    setError("");
+    setSuccess("");
+
+    window.history.replaceState(null, "", `#${section}`);
+  };
+
   // APPROVE RESTAURANT
-  // =====================================
   const handleApprove = async (restaurantId) => {
     try {
       setApprovingId(restaurantId);
@@ -120,9 +135,7 @@ function AdminDashboard() {
     }
   };
 
-  // =====================================
-  // OWNER FORM INPUT CHANGE
-  // =====================================
+  // OWNER FORM INPUT
   const handleOwnerInput = (e) => {
     const { name, value } = e.target;
 
@@ -132,9 +145,7 @@ function AdminDashboard() {
     }));
   };
 
-  // =====================================
   // CREATE RESTAURANT OWNER
-  // =====================================
   const handleCreateOwner = async (e) => {
     e.preventDefault();
 
@@ -174,18 +185,93 @@ function AdminDashboard() {
     }
   };
 
+  // FORMAT ADDRESS
+  const getAddress = (address) => {
+    if (typeof address === "object" && address !== null) {
+      return [
+        address.street,
+        address.city,
+        address.state,
+        address.pincode,
+      ]
+        .filter(Boolean)
+        .join(", ") || "N/A";
+    }
+
+    return address || "N/A";
+  };
+
+  // GET RESTAURANT IMAGE
+  const getRestaurantImage = (restaurant) => {
+    const possibleImages = [
+      restaurant.coverImage,
+      restaurant.logo,
+      restaurant.image,
+      restaurant.imageUrl,
+      restaurant.restaurantImage,
+      restaurant.images?.[0],
+    ];
+
+    const image = possibleImages.find(Boolean);
+
+    if (!image) return "";
+
+    // Handle Cloudinary or other image objects
+    if (typeof image === "object") {
+      const imageUrl =
+        image.url ||
+        image.secure_url ||
+        image.path ||
+        image.src;
+
+      if (!imageUrl) return "";
+
+      return getValidImageUrl(imageUrl);
+    }
+
+    return getValidImageUrl(image);
+  };
+
+  // FORMAT IMAGE URL
+  const getValidImageUrl = (image) => {
+    if (typeof image !== "string") return "";
+
+    const cleanImage = image.trim();
+
+    if (!cleanImage) return "";
+
+    // Full image URL
+    if (
+      cleanImage.startsWith("https://") ||
+      cleanImage.startsWith("http://") ||
+      cleanImage.startsWith("data:image/")
+    ) {
+      return cleanImage;
+    }
+
+    // Protocol-relative URL
+    if (cleanImage.startsWith("//")) {
+      return `https:${cleanImage}`;
+    }
+
+    // Backend-relative image path
+    return `http://localhost:5000${
+      cleanImage.startsWith("/") ? "" : "/"
+    }${cleanImage}`;
+  };
+
+  // COUNTS
   const pendingCount = restaurants.filter(
     (restaurant) => !restaurant.isApproved
   ).length;
 
   const approvedCount = restaurants.length - pendingCount;
 
-  const ownerIds = new Set(
-    restaurants
-      .map((restaurant) => restaurant.owner?._id)
-      .filter(Boolean)
-  );
+  const currentSection =
+    menuItems.find((item) => item.id === activeSection) ||
+    menuItems[0];
 
+  // DASHBOARD STATS
   const stats = [
     {
       icon: "🏪",
@@ -213,16 +299,24 @@ function AdminDashboard() {
     },
   ];
 
-  const menuItems = [
-    { icon: "📊", label: "Overview", href: "#overview" },
-    { icon: "🏪", label: "Restaurants", href: "#restaurants" },
-    { icon: "👥", label: "Restaurant Owners", href: "#owners" },
-    { icon: "🛍️", label: "All Orders", href: "#orders" },
-  ];
-
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
+      {/* SIDEBAR OVERLAY */}
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="admin-sidebar-overlay"
+          aria-label="Close sidebar"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* SIDEBAR */}
+      <aside
+        className={`admin-sidebar ${
+          sidebarOpen ? "admin-sidebar-open" : ""
+        }`}
+      >
         <div className="admin-brand">
           <span className="admin-brand-icon">F</span>
           <span>FoodFlow</span>
@@ -231,17 +325,23 @@ function AdminDashboard() {
         <p className="admin-sidebar-label">MAIN MENU</p>
 
         <nav className="admin-side-nav">
-          {menuItems.map((item, index) => (
-            <a
-              key={item.label}
-              href={item.href}
+          {menuItems.map((item) => (
+            <button
+              type="button"
+              key={item.id}
               className={`admin-nav-link ${
-                index === 0 ? "active" : ""
+                activeSection === item.id ? "active" : ""
               }`}
+              onClick={() => handleSectionChange(item.id)}
             >
               <span>{item.icon}</span>
+
               {item.label}
-            </a>
+
+              {activeSection === item.id && (
+                <span className="admin-nav-indicator">●</span>
+              )}
+            </button>
           ))}
         </nav>
 
@@ -250,6 +350,7 @@ function AdminDashboard() {
             <div className="admin-avatar">
               {(user?.name || "A").charAt(0).toUpperCase()}
             </div>
+
             <div>
               <strong>{user?.name || "Admin"}</strong>
               <small>Administrator</small>
@@ -258,16 +359,32 @@ function AdminDashboard() {
         </div>
       </aside>
 
+      {/* MAIN CONTENT */}
       <main className="admin-main">
+        {/* TOPBAR */}
         <header className="admin-topbar">
-          <div>
-            <p className="admin-breadcrumb">FoodFlow / Admin</p>
-            <h2>Dashboard Overview</h2>
+          <div className="admin-topbar-left">
+            <button
+              type="button"
+              className="admin-menu-toggle"
+              onClick={() => setSidebarOpen((prev) => !prev)}
+              aria-label="Toggle navigation"
+            >
+              ☰
+            </button>
+
+            <div>
+              <p className="admin-breadcrumb">
+                FoodFlow / Admin / {currentSection.label}
+              </p>
+
+              <h2>{currentSection.label}</h2>
+            </div>
           </div>
 
           <div className="admin-topbar-right">
             <span className="admin-status">
-              <span className="admin-status-dot"></span>
+              <span className="admin-status-dot" />
               Admin Panel
             </span>
 
@@ -277,447 +394,661 @@ function AdminDashboard() {
           </div>
         </header>
 
-        <div className="admin-content" id="overview">
-          <section className="admin-welcome">
-            <div>
-              <span className="admin-eyebrow">ADMINISTRATION</span>
-              <h1>Welcome back, {user?.name || "Admin"} 👋</h1>
-              <p>
-                Manage your restaurants, owners and orders from one place.
-              </p>
-            </div>
-
-            <div className="admin-welcome-icon">🍽️</div>
-          </section>
-
+        <div className="admin-content">
+          {/* ERROR MESSAGE */}
           {error && (
-            <p style={{ color: "red", margin: "15px 0" }}>
+            <div className="admin-alert admin-alert-error">
               {error}
-            </p>
+
+              <button
+                type="button"
+                onClick={() => setError("")}
+              >
+                ×
+              </button>
+            </div>
           )}
 
+          {/* SUCCESS MESSAGE */}
           {success && (
-            <p style={{ color: "green", margin: "15px 0" }}>
+            <div className="admin-alert admin-alert-success">
               {success}
-            </p>
+
+              <button
+                type="button"
+                onClick={() => setSuccess("")}
+              >
+                ×
+              </button>
+            </div>
           )}
 
-          {/* DASHBOARD STATS */}
-          <section className="admin-stats-grid">
-            {stats.map((stat) => (
-              <article className="admin-stat-card" key={stat.title}>
-                <div className="admin-stat-top">
-                  <span className="admin-stat-icon">{stat.icon}</span>
-                  <span className="admin-stat-menu">•••</span>
+          {/* =========================
+              OVERVIEW
+          ========================= */}
+          {activeSection === "overview" && (
+            <>
+              <section className="admin-welcome">
+                <div>
+                  <span className="admin-eyebrow">
+                    ADMINISTRATION
+                  </span>
+
+                  <h1>
+                    Welcome back, {user?.name || "Admin"} 👋
+                  </h1>
+
+                  <p>
+                    Manage your restaurants, owners and orders
+                    from one place.
+                  </p>
                 </div>
 
-                <p>{stat.title}</p>
-                <h2>{loading ? "..." : stat.value}</h2>
-                <small>{stat.note}</small>
-              </article>
-            ))}
-          </section>
+                <div className="admin-welcome-icon">🍽️</div>
+              </section>
 
-          {/* RESTAURANT MANAGEMENT */}
-          <section className="admin-section" id="restaurants">
-            <div className="admin-section-heading">
-              <div>
-                <h2>Restaurant Management</h2>
-                <p>
-                  Review restaurants and manage their approval.
-                </p>
-              </div>
-
-              <span className="admin-section-icon">🏪</span>
-            </div>
-
-            <div style={{ marginBottom: "20px" }}>
-              <strong>Approved: {approvedCount}</strong>
-              {" | "}
-              <strong>Pending: {pendingCount}</strong>
-
-              <button
-                type="button"
-                onClick={fetchRestaurants}
-                style={{
-                  marginLeft: "15px",
-                  padding: "8px 14px",
-                  cursor: "pointer",
-                }}
-              >
-                ↻ Refresh
-              </button>
-            </div>
-
-            {loading ? (
-              <p>Loading restaurants...</p>
-            ) : restaurants.length === 0 ? (
-              <div className="admin-empty-state">
-                <div>🏪</div>
-                <h3>No restaurants found</h3>
-                <p>
-                  New restaurant registrations will appear here.
-                </p>
-              </div>
-            ) : (
-              <div style={{ display: "grid", gap: "15px" }}>
-                {restaurants.map((restaurant) => (
+              {/* STATS */}
+              <section className="admin-stats-grid">
+                {stats.map((stat) => (
                   <article
-                    key={restaurant._id}
-                    style={{
-                      background: "var(--card-bg, #fff)",
-                      border: "1px solid #ddd",
-                      borderRadius: "12px",
-                      padding: "20px",
-                    }}
+                    className="admin-stat-card"
+                    key={stat.title}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        flexWrap: "wrap",
-                        gap: "12px",
-                      }}
-                    >
-                      <div>
-                        <h3 style={{ margin: "0 0 8px" }}>
-                          {restaurant.name}
-                        </h3>
+                    <div className="admin-stat-top">
+                      <span className="admin-stat-icon">
+                        {stat.icon}
+                      </span>
 
-                        <p>{restaurant.description}</p>
-
-                        <p>
-                          <strong>Owner:</strong>{" "}
-                          {restaurant.owner?.name || "Unknown"}
-                        </p>
-
-                        <p>
-                          <strong>Email:</strong>{" "}
-                          {restaurant.owner?.email || "N/A"}
-                        </p>
-
-                        <p>
-                          <strong>Phone:</strong>{" "}
-                          {restaurant.phone || "N/A"}
-                        </p>
-
-                        <p>
-                          <strong>Cuisine:</strong>{" "}
-                          {Array.isArray(restaurant.cuisine)
-                            ? restaurant.cuisine.join(", ")
-                            : restaurant.cuisine || "N/A"}
-                        </p>
-
-                        <p>
-                          <strong>Delivery Time:</strong>{" "}
-                          {restaurant.deliveryTime || "N/A"} minutes
-                        </p>
-
-                        <p>
-                          <strong>Minimum Order:</strong> ₹
-                          {restaurant.minimumOrder ?? "N/A"}
-                        </p>
-
-                        <p>
-                          <strong>Address:</strong>{" "}
-                          {typeof restaurant.address === "object"
-                            ? [
-                                restaurant.address?.street,
-                                restaurant.address?.city,
-                                restaurant.address?.state,
-                                restaurant.address?.pincode,
-                              ]
-                                .filter(Boolean)
-                                .join(", ") || "N/A"
-                            : restaurant.address || "N/A"}
-                        </p>
-                      </div>
-
-                      <div>
-                        {restaurant.isApproved ? (
-                          <span
-                            style={{
-                              color: "green",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            ✓ Approved
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            disabled={approvingId === restaurant._id}
-                            onClick={() =>
-                              handleApprove(restaurant._id)
-                            }
-                            style={{
-                              padding: "10px 18px",
-                              background: "#176b45",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "7px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            {approvingId === restaurant._id
-                              ? "Approving..."
-                              : "Approve Restaurant"}
-                          </button>
-                        )}
-                      </div>
+                      <span className="admin-stat-menu">
+                        •••
+                      </span>
                     </div>
+
+                    <p>{stat.title}</p>
+
+                    <h2>
+                      {loading || ownersLoading
+                        ? "..."
+                        : stat.value}
+                    </h2>
+
+                    <small>{stat.note}</small>
                   </article>
                 ))}
+              </section>
+
+              {/* APPROVAL SUMMARY */}
+              <section className="admin-section admin-overview-summary">
+                <div className="admin-section-heading">
+                  <div>
+                    <span className="admin-eyebrow">
+                      QUICK SUMMARY
+                    </span>
+
+                    <h2>Restaurant Approvals</h2>
+
+                    <p>
+                      Current restaurant approval status.
+                    </p>
+                  </div>
+
+                  <span className="admin-section-icon">🏪</span>
+                </div>
+
+                <div className="admin-approval-summary">
+                  <div>
+                    <span className="admin-summary-number">
+                      {approvedCount}
+                    </span>
+
+                    <span>Approved Restaurants</span>
+                  </div>
+
+                  <div>
+                    <span className="admin-summary-number">
+                      {pendingCount}
+                    </span>
+
+                    <span>Pending Approvals</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="admin-primary-btn"
+                    onClick={() =>
+                      handleSectionChange("restaurants")
+                    }
+                  >
+                    Manage Restaurants →
+                  </button>
+                </div>
+              </section>
+
+              {/* QUICK ACCESS */}
+              <section className="admin-section">
+                <div className="admin-section-heading">
+                  <div>
+                    <span className="admin-eyebrow">
+                      QUICK ACCESS
+                    </span>
+
+                    <h2>Manage FoodFlow</h2>
+
+                    <p>
+                      Jump directly to a management section.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="admin-quick-links">
+                  {menuItems
+                    .filter((item) => item.id !== "overview")
+                    .map((item) => (
+                      <button
+                        type="button"
+                        key={item.id}
+                        onClick={() =>
+                          handleSectionChange(item.id)
+                        }
+                      >
+                        <span>{item.icon}</span>
+
+                        <strong>{item.label}</strong>
+
+                        <span className="admin-quick-arrow">
+                          →
+                        </span>
+                      </button>
+                    ))}
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* =========================
+              RESTAURANTS
+          ========================= */}
+          {activeSection === "restaurants" && (
+            <section className="admin-section">
+              <div className="admin-section-heading">
+                <div>
+                  <span className="admin-eyebrow">
+                    BUSINESS MANAGEMENT
+                  </span>
+
+                  <h2>Restaurant Management</h2>
+
+                  <p>
+                    Review restaurants and manage their approval.
+                  </p>
+                </div>
+
+                <span className="admin-section-icon">🏪</span>
               </div>
-            )}
-          </section>
 
-          {/* RESTAURANT OWNERS MANAGEMENT */}
-          <section className="admin-section" id="owners">
-            <div className="admin-section-heading">
-              <div>
-                <h2>Restaurant Owners</h2>
-                <p>
-                  Create and manage independent restaurant owner accounts.
-                </p>
-              </div>
+              {/* TOOLBAR */}
+              <div className="admin-management-toolbar">
+                <div className="admin-approval-counts">
+                  <span className="admin-count-approved">
+                    ✓ Approved: {approvedCount}
+                  </span>
 
-              <span className="admin-section-icon">👥</span>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: "12px",
-                marginBottom: "20px",
-              }}
-            >
-              <p>
-                Total Restaurant Owners:{" "}
-                <strong>{owners.length}</strong>
-              </p>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowOwnerForm((prev) => !prev);
-                  setError("");
-                  setSuccess("");
-                }}
-                style={{
-                  padding: "10px 16px",
-                  background: "#176b45",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "7px",
-                  cursor: "pointer",
-                }}
-              >
-                {showOwnerForm
-                  ? "✕ Close Form"
-                  : "+ Add Restaurant Owner"}
-              </button>
-            </div>
-
-            {/* CREATE OWNER FORM */}
-            {showOwnerForm && (
-              <form
-                onSubmit={handleCreateOwner}
-                style={{
-                  background: "var(--card-bg, #fff)",
-                  border: "1px solid #ddd",
-                  borderRadius: "12px",
-                  padding: "20px",
-                  marginBottom: "25px",
-                  display: "grid",
-                  gap: "14px",
-                  maxWidth: "600px",
-                }}
-              >
-                <h3 style={{ margin: 0 }}>
-                  Create Restaurant Owner Account
-                </h3>
-
-                <label>
-                  Full Name
-                  <input
-                    type="text"
-                    name="name"
-                    value={ownerForm.name}
-                    onChange={handleOwnerInput}
-                    placeholder="Enter owner's full name"
-                    required
-                    style={inputStyle}
-                  />
-                </label>
-
-                <label>
-                  Email Address
-                  <input
-                    type="email"
-                    name="email"
-                    value={ownerForm.email}
-                    onChange={handleOwnerInput}
-                    placeholder="owner@example.com"
-                    required
-                    style={inputStyle}
-                  />
-                </label>
-
-                <label>
-                  Phone Number
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={ownerForm.phone}
-                    onChange={handleOwnerInput}
-                    placeholder="Enter phone number"
-                    style={inputStyle}
-                  />
-                </label>
-
-                <label>
-                  Password
-                  <input
-                    type="password"
-                    name="password"
-                    value={ownerForm.password}
-                    onChange={handleOwnerInput}
-                    placeholder="Minimum 6 characters"
-                    minLength={6}
-                    required
-                    style={inputStyle}
-                  />
-                </label>
+                  <span className="admin-count-pending">
+                    ⏳ Pending: {pendingCount}
+                  </span>
+                </div>
 
                 <button
-                  type="submit"
-                  disabled={creatingOwner}
-                  style={{
-                    padding: "12px",
-                    background: "#176b45",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "7px",
-                    cursor: creatingOwner ? "not-allowed" : "pointer",
-                  }}
+                  type="button"
+                  className="admin-outline-btn"
+                  onClick={fetchRestaurants}
+                  disabled={loading}
                 >
-                  {creatingOwner
-                    ? "Creating Account..."
-                    : "Create Restaurant Owner"}
+                  {loading ? "Loading..." : "↻ Refresh"}
                 </button>
-              </form>
-            )}
-
-            {/* OWNERS LIST */}
-            {ownersLoading ? (
-              <p>Loading restaurant owners...</p>
-            ) : owners.length === 0 ? (
-              <div className="admin-empty-state">
-                <div>👥</div>
-                <h3>No restaurant owners found</h3>
-                <p>Create an owner account to get started.</p>
               </div>
-            ) : (
-              <div style={{ display: "grid", gap: "15px" }}>
-                {owners.map((owner) => {
-                  const linkedRestaurants = restaurants.filter(
-                    (restaurant) =>
-                      restaurant.owner?._id === owner._id
-                  );
 
-                  return (
-                    <article
-                      key={owner._id}
-                      style={{
-                        background: "var(--card-bg, #fff)",
-                        border: "1px solid #ddd",
-                        borderRadius: "12px",
-                        padding: "20px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          flexWrap: "wrap",
-                          gap: "12px",
-                        }}
+              {/* LOADING */}
+              {loading ? (
+                <div className="admin-empty-state">
+                  <div>⏳</div>
+
+                  <h3>Loading restaurants...</h3>
+
+                  <p>
+                    Please wait while we fetch restaurant details.
+                  </p>
+                </div>
+              ) : restaurants.length === 0 ? (
+                /* NO RESTAURANTS */
+                <div className="admin-empty-state">
+                  <div>🏪</div>
+
+                  <h3>No restaurants found</h3>
+
+                  <p>
+                    New restaurant registrations will appear here.
+                  </p>
+                </div>
+              ) : (
+                /* RESTAURANT LIST */
+                <div className="admin-restaurant-list">
+                  {restaurants.map((restaurant) => {
+                    const imageUrl =
+                      getRestaurantImage(restaurant);
+
+                    return (
+                      <article
+                        className="admin-restaurant-card"
+                        key={restaurant._id}
                       >
-                        <div>
-                          <h3 style={{ margin: "0 0 10px" }}>
-                            {owner.name}
-                          </h3>
+                        {/* RESTAURANT IMAGE */}
+                        <div className="admin-restaurant-image">
+                          {imageUrl && (
+                            <img
+                              src={imageUrl}
+                              alt={restaurant.name || "Restaurant"}
+                              loading="lazy"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
 
+                                const fallback =
+                                  e.currentTarget.parentElement?.querySelector(
+                                    ".admin-restaurant-image-fallback"
+                                  );
+
+                                if (fallback) {
+                                  fallback.style.display = "flex";
+                                }
+                              }}
+                            />
+                          )}
+
+                          {/* FALLBACK IMAGE */}
+                          <div
+                            className="admin-restaurant-image-fallback"
+                            style={{
+                              display: imageUrl ? "none" : "flex",
+                            }}
+                          >
+                            <span className="admin-fallback-icon">
+                              🍽️
+                            </span>
+
+                            <span>{restaurant.name}</span>
+                          </div>
+
+                          {/* APPROVAL STATUS */}
+                          <span
+                            className={`admin-image-status ${
+                              restaurant.isApproved
+                                ? "is-approved"
+                                : "is-pending"
+                            }`}
+                          >
+                            {restaurant.isApproved
+                              ? "✓ APPROVED"
+                              : "⏳ PENDING"}
+                          </span>
+                        </div>
+
+                        {/* RESTAURANT NAME */}
+                        <div className="admin-restaurant-card-top">
+                          <div>
+                            <h3>{restaurant.name}</h3>
+
+                            <p>
+                              {restaurant.description ||
+                                "Welcome to our restaurant."}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* RESTAURANT DETAILS */}
+                        <div className="admin-restaurant-details">
                           <p>
-                            <strong>Email:</strong> {owner.email}
+                            <strong>👤 Owner</strong>
+
+                            <span>
+                              {restaurant.owner?.name || "Unknown"}
+                            </span>
                           </p>
 
                           <p>
-                            <strong>Phone:</strong>{" "}
-                            {owner.phone || "N/A"}
+                            <strong>✉️ Email</strong>
+
+                            <span>
+                              {restaurant.owner?.email || "N/A"}
+                            </span>
                           </p>
 
                           <p>
-                            <strong>Restaurants:</strong>{" "}
-                            {linkedRestaurants.length}
+                            <strong>📞 Phone</strong>
+
+                            <span>
+                              {restaurant.phone || "N/A"}
+                            </span>
+                          </p>
+
+                          <p>
+                            <strong>🍴 Cuisine</strong>
+
+                            <span>
+                              {Array.isArray(restaurant.cuisine)
+                                ? restaurant.cuisine.join(", ")
+                                : restaurant.cuisine || "N/A"}
+                            </span>
+                          </p>
+
+                          <p>
+                            <strong>🕒 Delivery Time</strong>
+
+                            <span>
+                              {restaurant.deliveryTime || "N/A"}
+                              {restaurant.deliveryTime ? " minutes" : ""}
+                            </span>
+                          </p>
+
+                          <p>
+                            <strong>💰 Minimum Order</strong>
+
+                            <span>
+                              {restaurant.minimumOrder != null
+                                ? `₹${restaurant.minimumOrder}`
+                                : "N/A"}
+                            </span>
+                          </p>
+
+                          <p className="admin-address-detail">
+                            <strong>📍 Address</strong>
+
+                            <span>
+                              {getAddress(restaurant.address)}
+                            </span>
                           </p>
                         </div>
 
-                        <span
-                          style={{
-                            color: owner.isActive ? "green" : "red",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {owner.isActive ? "● Active" : "● Inactive"}
-                        </span>
-                      </div>
-                    </article>
-                  );
-                })}
+                        {/* APPROVE BUTTON */}
+                        {!restaurant.isApproved && (
+                          <div className="admin-restaurant-card-actions">
+                            <button
+                              type="button"
+                              className="admin-primary-btn"
+                              disabled={
+                                approvingId === restaurant._id
+                              }
+                              onClick={() =>
+                                handleApprove(restaurant._id)
+                              }
+                            >
+                              {approvingId === restaurant._id
+                                ? "Approving..."
+                                : "✓ Approve Restaurant"}
+                            </button>
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* =========================
+              RESTAURANT OWNERS
+          ========================= */}
+          {activeSection === "owners" && (
+            <section className="admin-section">
+              <div className="admin-section-heading">
+                <div>
+                  <span className="admin-eyebrow">
+                    ACCOUNT MANAGEMENT
+                  </span>
+
+                  <h2>Restaurant Owners</h2>
+
+                  <p>
+                    Create and manage independent restaurant owner
+                    accounts.
+                  </p>
+                </div>
+
+                <span className="admin-section-icon">👥</span>
               </div>
-            )}
 
-            <button
-              type="button"
-              onClick={fetchOwners}
-              style={{
-                marginTop: "18px",
-                padding: "8px 14px",
-                cursor: "pointer",
-              }}
-            >
-              ↻ Refresh Owners
-            </button>
-          </section>
+              {/* OWNER TOOLBAR */}
+              <div className="admin-management-toolbar">
+                <div>
+                  <span className="admin-owner-total">
+                    {owners.length}
+                  </span>
 
-          {/* ALL ORDERS */}
-          <section className="admin-section" id="orders">
-            <div className="admin-section-heading">
-              <div>
-                <h2>All Orders</h2>
-                <p>Order management will be connected next.</p>
+                  <span>Total Restaurant Owners</span>
+                </div>
+
+                <button
+                  type="button"
+                  className="admin-primary-btn"
+                  onClick={() => {
+                    setShowOwnerForm((prev) => !prev);
+                    setError("");
+                    setSuccess("");
+                  }}
+                >
+                  {showOwnerForm
+                    ? "✕ Close Form"
+                    : "+ Add Restaurant Owner"}
+                </button>
               </div>
 
-              <span className="admin-section-icon">🛍️</span>
-            </div>
+              {/* CREATE OWNER FORM */}
+              {showOwnerForm && (
+                <form
+                  onSubmit={handleCreateOwner}
+                  className="admin-owner-form"
+                >
+                  <div className="admin-subheading">
+                    <h3>Create Owner Account</h3>
 
-            <div className="admin-empty-state">
-              <div>📦</div>
-              <h3>Order data will appear here</h3>
-              <p>
-                Connect the admin orders API to view all restaurant orders.
-              </p>
-            </div>
-          </section>
+                    <p>
+                      Enter the details to register a new restaurant
+                      owner.
+                    </p>
+                  </div>
 
+                  <div className="admin-owner-form-grid">
+                    <label>
+                      Full Name
+
+                      <input
+                        type="text"
+                        name="name"
+                        value={ownerForm.name}
+                        onChange={handleOwnerInput}
+                        placeholder="Enter owner's full name"
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      Email Address
+
+                      <input
+                        type="email"
+                        name="email"
+                        value={ownerForm.email}
+                        onChange={handleOwnerInput}
+                        placeholder="owner@example.com"
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      Phone Number
+
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={ownerForm.phone}
+                        onChange={handleOwnerInput}
+                        placeholder="Enter phone number"
+                      />
+                    </label>
+
+                    <label>
+                      Password
+
+                      <input
+                        type="password"
+                        name="password"
+                        value={ownerForm.password}
+                        onChange={handleOwnerInput}
+                        placeholder="Minimum 6 characters"
+                        minLength={6}
+                        required
+                      />
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="admin-primary-btn"
+                    disabled={creatingOwner}
+                  >
+                    {creatingOwner
+                      ? "Creating Account..."
+                      : "Create Restaurant Owner"}
+                  </button>
+                </form>
+              )}
+
+              {/* OWNER LOADING */}
+              {ownersLoading ? (
+                <p>Loading restaurant owners...</p>
+              ) : owners.length === 0 ? (
+                <div className="admin-empty-state">
+                  <div>👥</div>
+
+                  <h3>No restaurant owners found</h3>
+
+                  <p>
+                    Create an owner account to get started.
+                  </p>
+                </div>
+              ) : (
+                /* OWNER LIST */
+                <div className="admin-owner-grid">
+                  {owners.map((owner) => {
+                    const linkedRestaurants = restaurants.filter(
+                      (restaurant) => {
+                        const ownerId =
+                          restaurant.owner?._id ||
+                          restaurant.owner;
+
+                        return String(ownerId) === String(owner._id);
+                      }
+                    );
+
+                    return (
+                      <article
+                        className="admin-owner-card"
+                        key={owner._id}
+                      >
+                        <div className="admin-owner-card-top">
+                          <div className="admin-owner-avatar">
+                            {(owner.name || "O")
+                              .charAt(0)
+                              .toUpperCase()}
+                          </div>
+
+                          <span
+                            className={
+                              owner.isActive
+                                ? "admin-owner-active"
+                                : "admin-owner-inactive"
+                            }
+                          >
+                            {owner.isActive
+                              ? "● Active"
+                              : "● Inactive"}
+                          </span>
+                        </div>
+
+                        <h3>{owner.name}</h3>
+
+                        <p className="admin-owner-email">
+                          {owner.email}
+                        </p>
+
+                        <div className="admin-owner-info">
+                          <span>
+                            📞 {owner.phone || "Phone not added"}
+                          </span>
+
+                          <span>
+                            🏪 {linkedRestaurants.length} Restaurant(s)
+                          </span>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* REFRESH OWNERS */}
+              <button
+                type="button"
+                className="admin-outline-btn admin-refresh-owners"
+                onClick={fetchOwners}
+                disabled={ownersLoading}
+              >
+                {ownersLoading ? "Loading..." : "↻ Refresh Owners"}
+              </button>
+            </section>
+          )}
+
+          {/* =========================
+              ALL ORDERS
+          ========================= */}
+          {activeSection === "orders" && (
+            <section className="admin-section">
+              <div className="admin-section-heading">
+                <div>
+                  <span className="admin-eyebrow">
+                    ORDER MANAGEMENT
+                  </span>
+
+                  <h2>All Orders</h2>
+
+                  <p>
+                    Monitor and manage customer orders across
+                    restaurants.
+                  </p>
+                </div>
+
+                <span className="admin-section-icon">🛍️</span>
+              </div>
+
+              <div className="admin-empty-state admin-orders-empty">
+                <div>📦</div>
+
+                <h3>Order data will appear here</h3>
+
+                <p>
+                  Connect the admin orders API to view all restaurant
+                  orders.
+                </p>
+              </div>
+            </section>
+          )}
+
+          {/* FOOTER */}
           <footer className="admin-page-footer">
-            <span>© {new Date().getFullYear()} FoodFlow Admin</span>
+            <span>
+              © {new Date().getFullYear()} FoodFlow Admin
+            </span>
+
             <span>Manage smarter. Serve better.</span>
           </footer>
         </div>
@@ -725,16 +1056,5 @@ function AdminDashboard() {
     </div>
   );
 }
-
-const inputStyle = {
-  display: "block",
-  width: "100%",
-  boxSizing: "border-box",
-  padding: "11px",
-  marginTop: "6px",
-  border: "1px solid #ccc",
-  borderRadius: "7px",
-  fontSize: "14px",
-};
 
 export default AdminDashboard;
