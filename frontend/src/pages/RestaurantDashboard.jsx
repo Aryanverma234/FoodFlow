@@ -79,6 +79,7 @@ function RestaurantDashboard() {
 
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [activeTab, setActiveTab] = useState("orders");
+
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState(null);
@@ -88,6 +89,8 @@ function RestaurantDashboard() {
   const [categoryForm, setCategoryForm] = useState(initialCategoryForm);
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [categoryCreating, setCategoryCreating] = useState(false);
+  const [categoryEditingId, setCategoryEditingId] = useState(null);
+  const [openCategoryMenuId, setOpenCategoryMenuId] = useState(null);
 
   const [foodItems, setFoodItems] = useState([]);
   const [foodForm, setFoodForm] = useState(initialFoodForm);
@@ -203,11 +206,11 @@ function RestaurantDashboard() {
     }
   };
 
-  // Manage restaurant
   // Fetch restaurant incoming orders
   const fetchRestaurantOrders = async (restaurant) => {
     try {
       setOrdersLoading(true);
+
       const target = restaurant || selectedRestaurant;
       if (!target) return;
 
@@ -224,7 +227,7 @@ function RestaurantDashboard() {
     }
   };
 
-  // Update order status (pipeline)
+  // Update order status
   const handleUpdateOrderStatus = async (orderId, newStatus, reason) => {
     try {
       setUpdatingOrderId(orderId);
@@ -232,6 +235,7 @@ function RestaurantDashboard() {
       setError("");
 
       const payload = { orderStatus: newStatus };
+
       if (reason) payload.cancellationReason = reason;
 
       const response = await axios.patch(
@@ -258,8 +262,11 @@ function RestaurantDashboard() {
 
   const formatOrderDate = (date) => {
     if (!date) return "Date unavailable";
+
     const d = new Date(date);
+
     if (Number.isNaN(d.getTime())) return "Date unavailable";
+
     return d.toLocaleDateString("en-IN", {
       day: "numeric",
       month: "short",
@@ -275,17 +282,23 @@ function RestaurantDashboard() {
       maximumFractionDigits: 0,
     }).format(amt ?? 0);
 
+  // Manage restaurant
   const handleManageRestaurant = async (restaurant) => {
     setSelectedRestaurant(restaurant);
     setActiveTab("orders");
+
     setOrders([]);
     setCategories([]);
     setFoodItems([]);
-    setOrders([]);
+
     setCategoryForm(initialCategoryForm);
+    setCategoryEditingId(null);
+    setOpenCategoryMenuId(null);
+
     setFoodForm(initialFoodForm);
     setFoodEditingId(null);
     setOpenFoodMenuId(null);
+
     setMessage("");
     setError("");
 
@@ -296,7 +309,10 @@ function RestaurantDashboard() {
     ]);
   };
 
-  // Category management
+  // ==============================
+  // CATEGORY MANAGEMENT
+  // ==============================
+
   const handleCategoryChange = (e) => {
     setCategoryForm({
       ...categoryForm,
@@ -304,6 +320,7 @@ function RestaurantDashboard() {
     });
   };
 
+  // Create or update category
   const handleCreateCategory = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -315,31 +332,121 @@ function RestaurantDashboard() {
       setCategoryCreating(true);
 
       const payload = {
-        ...categoryForm,
-        restaurant: selectedRestaurant._id,
+        name: categoryForm.name.trim(),
+        description: categoryForm.description,
+        image: categoryForm.image,
         sortOrder: Number(categoryForm.sortOrder) || 0,
       };
 
-      const response = await axios.post(`${API_URL}/categories`, payload, {
-        headers: authHeaders,
-      });
+      const response = categoryEditingId
+        ? await axios.patch(
+            `${API_URL}/categories/${categoryEditingId}`,
+            payload,
+            { headers: authHeaders }
+          )
+        : await axios.post(
+            `${API_URL}/categories`,
+            {
+              ...payload,
+              restaurant: selectedRestaurant._id,
+            },
+            { headers: authHeaders }
+          );
 
       setMessage(
-        response.data.message || "Category successfully created!"
+        response.data.message ||
+          (categoryEditingId
+            ? "Category updated successfully!"
+            : "Category created successfully!")
       );
 
       setCategoryForm(initialCategoryForm);
+      setCategoryEditingId(null);
+      setOpenCategoryMenuId(null);
+
       await fetchCategories(selectedRestaurant);
     } catch (err) {
       setError(
-        err.response?.data?.message || "Category create nahi ho payi."
+        err.response?.data?.message || "Category save nahi ho payi."
       );
     } finally {
       setCategoryCreating(false);
     }
   };
 
-  // Food form management
+  // Edit category
+  const handleEditCategory = (category) => {
+    setCategoryEditingId(category._id);
+    setOpenCategoryMenuId(null);
+
+    setCategoryForm({
+      name: category.name || "",
+      description: category.description || "",
+      image: category.image || "",
+      sortOrder: category.sortOrder ?? 0,
+    });
+
+    setMessage("");
+    setError("");
+
+    setTimeout(() => {
+      document.querySelector(".rd-management")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+  };
+
+  // Cancel category edit
+  const handleCancelCategoryEdit = () => {
+    setCategoryEditingId(null);
+    setCategoryForm(initialCategoryForm);
+    setOpenCategoryMenuId(null);
+    setMessage("");
+    setError("");
+  };
+
+  // Delete category
+  const handleDeleteCategory = async (categoryId) => {
+    setOpenCategoryMenuId(null);
+
+    const confirmed = window.confirm(
+      "Kya tum is category ko delete karna chahte ho? Is category ke food items par bhi asar pad sakta hai."
+    );
+
+    if (!confirmed) return;
+
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await axios.delete(
+        `${API_URL}/categories/${categoryId}`,
+        { headers: authHeaders }
+      );
+
+      if (categoryEditingId === categoryId) {
+        setCategoryEditingId(null);
+        setCategoryForm(initialCategoryForm);
+      }
+
+      setMessage(
+        response.data.message || "Category deleted successfully!"
+      );
+
+      await fetchCategories(selectedRestaurant);
+      await fetchFoodItems(selectedRestaurant);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Category delete nahi ho payi."
+      );
+    }
+  };
+
+  // ==============================
+  // FOOD ITEM MANAGEMENT
+  // ==============================
+
   const handleFoodChange = (e) => {
     setFoodForm({
       ...foodForm,
@@ -499,29 +606,51 @@ function RestaurantDashboard() {
     }
   };
 
+  // Close restaurant workspace
   const closeManagement = () => {
     setSelectedRestaurant(null);
     setCategories([]);
     setFoodItems([]);
     setOrders([]);
+
+    setCategoryEditingId(null);
+    setOpenCategoryMenuId(null);
+    setCategoryForm(initialCategoryForm);
+
     setFoodEditingId(null);
     setOpenFoodMenuId(null);
     setFoodForm(initialFoodForm);
+
     setMessage("");
     setError("");
   };
 
+  // Order statistics
   const activeOrdersCount = orders.filter(
-    (o) => o.orderStatus !== "DELIVERED" && o.orderStatus !== "CANCELLED"
+    (o) =>
+      o.orderStatus !== "DELIVERED" &&
+      o.orderStatus !== "CANCELLED"
   ).length;
 
   const filteredOrders = orders.filter((o) => {
     if (orderFilter === "new") return o.orderStatus === "PLACED";
-    if (orderFilter === "kitchen")
+
+    if (orderFilter === "kitchen") {
       return ["CONFIRMED", "PREPARING", "READY"].includes(o.orderStatus);
-    if (orderFilter === "delivery") return o.orderStatus === "OUT_FOR_DELIVERY";
-    if (orderFilter === "delivered") return o.orderStatus === "DELIVERED";
-    if (orderFilter === "cancelled") return o.orderStatus === "CANCELLED";
+    }
+
+    if (orderFilter === "delivery") {
+      return o.orderStatus === "OUT_FOR_DELIVERY";
+    }
+
+    if (orderFilter === "delivered") {
+      return o.orderStatus === "DELIVERED";
+    }
+
+    if (orderFilter === "cancelled") {
+      return o.orderStatus === "CANCELLED";
+    }
+
     return true;
   });
 
@@ -715,8 +844,21 @@ function RestaurantDashboard() {
 
                 <div className="rd-restaurant-meta">
                   <span>
-                    📍 {restaurant.address || "Address not added"}
+                    📍{" "}
+                    {typeof restaurant.address === "string"
+                      ? restaurant.address || "Address not added"
+                      : restaurant.address
+                        ? [
+                            restaurant.address.street,
+                            restaurant.address.city,
+                            restaurant.address.state,
+                            restaurant.address.pincode,
+                          ]
+                            .filter(Boolean)
+                            .join(", ") || "Address not added"
+                        : "Address not added"}
                   </span>
+
                   <span>
                     🍴 {restaurant.cuisine || "Cuisine not added"}
                   </span>
@@ -762,7 +904,8 @@ function RestaurantDashboard() {
               onClick={() => {
                 setActiveTab("orders");
                 setOpenFoodMenuId(null);
-                if (selectedRestaurant) fetchRestaurantOrders(selectedRestaurant);
+                setOpenCategoryMenuId(null);
+                fetchRestaurantOrders(selectedRestaurant);
               }}
             >
               🛍️ Incoming Orders
@@ -770,6 +913,7 @@ function RestaurantDashboard() {
                 <span className="rd-badge-count">{activeOrdersCount}</span>
               )}
             </button>
+
             <button
               type="button"
               className={activeTab === "categories" ? "active" : ""}
@@ -784,7 +928,11 @@ function RestaurantDashboard() {
             <button
               type="button"
               className={activeTab === "food" ? "active" : ""}
-              onClick={() => setActiveTab("food")}
+              onClick={() => {
+                setActiveTab("food");
+                setOpenFoodMenuId(null);
+                setOpenCategoryMenuId(null);
+              }}
             >
               🍔 Food Items ({foodItems.length})
             </button>
@@ -796,7 +944,10 @@ function RestaurantDashboard() {
               <div className="rd-orders-topbar">
                 <div className="rd-subheading" style={{ margin: 0 }}>
                   <h3>Kitchen & Delivery Orders</h3>
-                  <p>Accept incoming orders, manage food preparation, and track dispatch.</p>
+                  <p>
+                    Accept incoming orders, manage food preparation, and track
+                    dispatch.
+                  </p>
                 </div>
 
                 <button
@@ -819,13 +970,16 @@ function RestaurantDashboard() {
                 >
                   All ({orders.length})
                 </button>
+
                 <button
                   type="button"
                   className={orderFilter === "new" ? "active" : ""}
                   onClick={() => setOrderFilter("new")}
                 >
-                  ⚡ New ({orders.filter((o) => o.orderStatus === "PLACED").length})
+                  ⚡ New (
+                  {orders.filter((o) => o.orderStatus === "PLACED").length})
                 </button>
+
                 <button
                   type="button"
                   className={orderFilter === "kitchen" ? "active" : ""}
@@ -834,11 +988,14 @@ function RestaurantDashboard() {
                   🍳 In Kitchen (
                   {
                     orders.filter((o) =>
-                      ["CONFIRMED", "PREPARING", "READY"].includes(o.orderStatus)
+                      ["CONFIRMED", "PREPARING", "READY"].includes(
+                        o.orderStatus
+                      )
                     ).length
                   }
                   )
                 </button>
+
                 <button
                   type="button"
                   className={orderFilter === "delivery" ? "active" : ""}
@@ -846,11 +1003,13 @@ function RestaurantDashboard() {
                 >
                   🛵 Delivery (
                   {
-                    orders.filter((o) => o.orderStatus === "OUT_FOR_DELIVERY")
-                      .length
+                    orders.filter(
+                      (o) => o.orderStatus === "OUT_FOR_DELIVERY"
+                    ).length
                   }
                   )
                 </button>
+
                 <button
                   type="button"
                   className={orderFilter === "delivered" ? "active" : ""}
@@ -859,6 +1018,7 @@ function RestaurantDashboard() {
                   ✓ Delivered (
                   {orders.filter((o) => o.orderStatus === "DELIVERED").length})
                 </button>
+
                 <button
                   type="button"
                   className={orderFilter === "cancelled" ? "active" : ""}
@@ -893,17 +1053,20 @@ function RestaurantDashboard() {
                         }`}
                         key={order._id}
                       >
-                        {/* Header */}
                         <div className="rd-order-header">
                           <div>
                             <div className="rd-order-id-row">
-                              <strong>#{order.orderNumber || order._id}</strong>
+                              <strong>
+                                #{order.orderNumber || order._id}
+                              </strong>
+
                               <span
                                 className={`rd-order-status-badge status-${order.orderStatus.toLowerCase()}`}
                               >
                                 {order.orderStatus.replaceAll("_", " ")}
                               </span>
                             </div>
+
                             <span className="rd-order-time">
                               🕒 {formatOrderDate(order.createdAt)}
                             </span>
@@ -911,8 +1074,11 @@ function RestaurantDashboard() {
 
                           <div className="rd-order-payment-box">
                             <span className="payment-type">
-                              {isCod ? "💵 Cash on Delivery" : "💳 Online Payment"}
+                              {isCod
+                                ? "💵 Cash on Delivery"
+                                : "💳 Online Payment"}
                             </span>
+
                             <span
                               className={`payment-pill ${
                                 isPaid ? "paid" : "pending"
@@ -921,16 +1087,18 @@ function RestaurantDashboard() {
                               {isPaid
                                 ? "PAID"
                                 : isCod
-                                ? "COLLECT CASH"
-                                : "PAYMENT PENDING"}
+                                  ? "COLLECT CASH"
+                                  : "PAYMENT PENDING"}
                             </span>
                           </div>
                         </div>
 
-                        {/* Customer & Address Details */}
                         <div className="rd-order-customer">
                           <div className="cust-info">
-                            <strong>👤 {order.user?.name || "Customer"}</strong>
+                            <strong>
+                              👤 {order.user?.name || "Customer"}
+                            </strong>
+
                             {order.user?.phone && (
                               <a
                                 href={`tel:${order.user.phone}`}
@@ -955,15 +1123,16 @@ function RestaurantDashboard() {
                           )}
                         </div>
 
-                        {/* Order Items */}
                         <div className="rd-order-items-box">
                           <h4>Ordered Items</h4>
+
                           <ul className="rd-order-items-list">
                             {order.items?.map((item, idx) => (
                               <li key={item._id || idx}>
                                 <span className="item-name-qty">
                                   <strong>{item.quantity}×</strong> {item.name}
                                 </span>
+
                                 <span className="item-price">
                                   {formatCurrency(
                                     item.subtotal ||
@@ -980,7 +1149,6 @@ function RestaurantDashboard() {
                           </div>
                         </div>
 
-                        {/* Actions Pipeline */}
                         <div className="rd-order-actions-bar">
                           {order.orderStatus === "PLACED" && (
                             <div className="action-buttons-group">
@@ -988,12 +1156,16 @@ function RestaurantDashboard() {
                                 type="button"
                                 className="rd-btn-accept"
                                 onClick={() =>
-                                  handleUpdateOrderStatus(order._id, "CONFIRMED")
+                                  handleUpdateOrderStatus(
+                                    order._id,
+                                    "CONFIRMED"
+                                  )
                                 }
                                 disabled={isBusy}
                               >
                                 {isBusy ? "Updating..." : "✓ Accept & Confirm"}
                               </button>
+
                               <button
                                 type="button"
                                 className="rd-btn-reject"
@@ -1002,6 +1174,7 @@ function RestaurantDashboard() {
                                     "Reason for rejecting this order?",
                                     "Item out of stock"
                                   );
+
                                   if (reason !== null) {
                                     handleUpdateOrderStatus(
                                       order._id,
@@ -1022,11 +1195,16 @@ function RestaurantDashboard() {
                               type="button"
                               className="rd-btn-pipeline"
                               onClick={() =>
-                                handleUpdateOrderStatus(order._id, "PREPARING")
+                                handleUpdateOrderStatus(
+                                  order._id,
+                                  "PREPARING"
+                                )
                               }
                               disabled={isBusy}
                             >
-                              {isBusy ? "Updating..." : "🍳 Start Cooking (Preparing)"}
+                              {isBusy
+                                ? "Updating..."
+                                : "🍳 Start Cooking (Preparing)"}
                             </button>
                           )}
 
@@ -1039,7 +1217,9 @@ function RestaurantDashboard() {
                               }
                               disabled={isBusy}
                             >
-                              {isBusy ? "Updating..." : "🥡 Food is Ready for Pickup"}
+                              {isBusy
+                                ? "Updating..."
+                                : "🥡 Food is Ready for Pickup"}
                             </button>
                           )}
 
@@ -1066,7 +1246,10 @@ function RestaurantDashboard() {
                               type="button"
                               className="rd-btn-complete"
                               onClick={() =>
-                                handleUpdateOrderStatus(order._id, "DELIVERED")
+                                handleUpdateOrderStatus(
+                                  order._id,
+                                  "DELIVERED"
+                                )
                               }
                               disabled={isBusy}
                             >
@@ -1100,8 +1283,15 @@ function RestaurantDashboard() {
           {activeTab === "categories" && (
             <div className="rd-tab-content">
               <div className="rd-subheading">
-                <h3>Add New Category</h3>
-                <p>Create categories to organise your menu.</p>
+                <h3>
+                  {categoryEditingId ? "Edit Category" : "Add New Category"}
+                </h3>
+
+                <p>
+                  {categoryEditingId
+                    ? "Update category details and save your changes."
+                    : "Create categories to organise your menu."}
+                </p>
               </div>
 
               <form className="rd-form" onSubmit={handleCreateCategory}>
@@ -1141,13 +1331,30 @@ function RestaurantDashboard() {
                   />
                 </div>
 
-                <button
-                  className="rd-primary-btn"
-                  type="submit"
-                  disabled={categoryCreating}
-                >
-                  {categoryCreating ? "Creating..." : "+ Add Category"}
-                </button>
+                <div className="rd-food-form-actions">
+                  <button
+                    className="rd-primary-btn"
+                    type="submit"
+                    disabled={categoryCreating}
+                  >
+                    {categoryCreating
+                      ? "Saving..."
+                      : categoryEditingId
+                        ? "Save Changes"
+                        : "+ Add Category"}
+                  </button>
+
+                  {categoryEditingId && (
+                    <button
+                      className="rd-outline-btn"
+                      type="button"
+                      onClick={handleCancelCategoryEdit}
+                      disabled={categoryCreating}
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
               </form>
 
               <div className="rd-subheading">
@@ -1166,18 +1373,63 @@ function RestaurantDashboard() {
                       className="rd-category-card"
                       key={category._id}
                     >
-                      <img
-                        src={getCategoryImage(category)}
-                        alt={category.name}
-                        className="rd-category-image"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = fallbackImage;
-                        }}
-                      />
+                      <div className="rd-food-image-wrap">
+                        <img
+                          src={getCategoryImage(category)}
+                          alt={category.name}
+                          className="rd-category-image"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = fallbackImage;
+                          }}
+                        />
+
+                        {/* Category Three Dot Menu */}
+                        <div className="rd-food-menu">
+                          <button
+                            type="button"
+                            className="rd-food-menu-trigger"
+                            onClick={() =>
+                              setOpenCategoryMenuId(
+                                openCategoryMenuId === category._id
+                                  ? null
+                                  : category._id
+                              )
+                            }
+                            aria-label={`Options for ${category.name}`}
+                            aria-expanded={
+                              openCategoryMenuId === category._id
+                            }
+                          >
+                            ⋮
+                          </button>
+
+                          {openCategoryMenuId === category._id && (
+                            <div className="rd-food-dropdown">
+                              <button
+                                type="button"
+                                onClick={() => handleEditCategory(category)}
+                              >
+                                ✏️ Edit Category
+                              </button>
+
+                              <button
+                                type="button"
+                                className="rd-food-delete-option"
+                                onClick={() =>
+                                  handleDeleteCategory(category._id)
+                                }
+                              >
+                                🗑️ Delete Category
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
                       <div className="rd-category-content">
                         <h4>{category.name}</h4>
+
                         <p>
                           {category.description ||
                             "Freshly prepared for you."}
@@ -1231,6 +1483,7 @@ function RestaurantDashboard() {
                       required
                     >
                       <option value="">Select Category *</option>
+
                       {categories.map((category) => (
                         <option key={category._id} value={category._id}>
                           {category.name}
@@ -1351,17 +1604,13 @@ function RestaurantDashboard() {
               {/* Existing Food Items */}
               <div className="rd-subheading">
                 <h3>Existing Food Items</h3>
-                <p>
-                  {foodItems.length} food items in this restaurant.
-                </p>
+                <p>{foodItems.length} food items in this restaurant.</p>
               </div>
 
               {foodLoading ? (
                 <div className="rd-empty">Loading food items...</div>
               ) : foodItems.length === 0 ? (
-                <div className="rd-empty">
-                  No food items added yet.
-                </div>
+                <div className="rd-empty">No food items added yet.</div>
               ) : (
                 <div className="rd-food-grid">
                   {foodItems.map((item) => (
@@ -1382,7 +1631,7 @@ function RestaurantDashboard() {
                           </span>
                         )}
 
-                        {/* Three Dot Menu */}
+                        {/* Food Three Dot Menu */}
                         <div className="rd-food-menu">
                           <button
                             type="button"
@@ -1437,8 +1686,7 @@ function RestaurantDashboard() {
                         </div>
 
                         <p>
-                          {item.description ||
-                            "Freshly prepared for you."}
+                          {item.description || "Freshly prepared for you."}
                         </p>
 
                         <span className="rd-food-category">

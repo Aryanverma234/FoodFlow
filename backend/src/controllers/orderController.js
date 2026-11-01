@@ -460,7 +460,10 @@ const getRestaurantOrders = async (req, res) => {
 // ============================================
 // UPDATE ORDER STATUS
 // ============================================
+
 const updateOrderStatus = async (req, res) => {
+  const session = await mongoose.startSession();
+
   try {
     const { id } = req.params;
     const { orderStatus } = req.body;
@@ -474,13 +477,6 @@ const updateOrderStatus = async (req, res) => {
       "CANCELLED",
     ];
 
-    if (!orderStatus) {
-      return res.status(400).json({
-        success: false,
-        message: "Order status is required",
-      });
-    }
-
     if (!allowedStatuses.includes(orderStatus)) {
       return res.status(400).json({
         success: false,
@@ -488,85 +484,113 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const order = await Order.findById(id);
+    let updatedOrder;
 
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
+    await session.withTransaction(async () => {
+      const order = await Order.findById(id).session(session);
 
-    const restaurant = await Restaurant.findOne({
-      _id: order.restaurant,
-      owner: req.user.userId,
-      isActive: true,
+      if (!order) {
+        const error = new Error("Order not found");
+        error.statusCode = 404;
+        throw error;
+      }
+
+      const restaurant = await Restaurant.findOne({
+        _id: order.restaurant,
+        owner: req.user.userId,
+      }).session(session);
+
+      if (!restaurant) {
+        const error = new Error(
+          "You are not authorized to update this order"
+        );
+        error.statusCode = 403;
+        throw error;
+      }
+
+      if (order.orderStatus === "CANCELLED") {
+        const error = new Error(
+          "Cancelled order cannot be updated"
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+
+      if (order.orderStatus === "DELIVERED") {
+        const error = new Error(
+          "Delivered order cannot be updated"
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+
+      order.orderStatus = orderStatus;
+
+      if (orderStatus === "CANCELLED") {
+        order.cancellationReason =
+          req.body.cancellationReason || "";
+      }
+
+      // COD cash received when order is marked DELIVERED
+      if (
+        orderStatus === "DELIVERED" &&
+        order.paymentMethod === "COD"
+      ) {
+        const payment = await Payment.findOne({
+          order: order._id,
+          method: "COD",
+        }).session(session);
+
+        if (!payment) {
+          const error = new Error(
+            "COD payment record not found"
+          );
+          error.statusCode = 404;
+          throw error;
+        }
+
+        payment.status = "SUCCESS";
+        payment.paidAt = new Date();
+
+        await payment.save({ session });
+
+        order.paymentStatus = "PAID";
+      }
+
+      await order.save({ session });
+
+      updatedOrder = order;
     });
 
-    if (!restaurant) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "You don't have permission to update this order",
-      });
-    }
+    // Create notification after successful transaction
+    await createOrderNotification(
+      updatedOrder,
+      updatedOrder.orderStatus
+    );
 
-    if (order.orderStatus === "CANCELLED") {
-      return res.status(400).json({
-        success: false,
-        message: "Cancelled order cannot be updated",
-      });
-    }
-
-    if (order.orderStatus === "DELIVERED") {
-      return res.status(400).json({
-        success: false,
-        message: "Delivered order cannot be updated",
-      });
-    }
-
-    order.orderStatus = orderStatus;
-    if (orderStatus === "CANCELLED") {
-      order.cancellationReason = req.body.cancellationReason || "Cancelled by restaurant";
-    }
-
-    await order.save();
-
-    await createOrderNotification({
-      userId: order.user._id || order.user,
-      orderId: order._id,
-      orderNumber: order.orderNumber,
-      orderStatus: order.orderStatus,
-    });
-
-    const updatedOrder = await Order.findById(order._id)
-      .populate(
-        "user",
-        "name email phone"
-      )
-      .populate(
-        "restaurant",
-        "name logo deliveryTime"
-      )
-      .populate(
-        "items.foodItem",
-        "name image"
-      );
+    const populatedOrder = await Order.findById(
+      updatedOrder._id
+    )
+      .populate("user", "name email phone")
+      .populate("restaurant", "name");
 
     return res.status(200).json({
       success: true,
       message: "Order status updated successfully",
-      order: updatedOrder,
+      order: populatedOrder,
     });
   } catch (error) {
     console.error("Update Order Status Error:", error);
 
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Server error while updating order status",
+      message: error.message || "Failed to update order status",
     });
+  } finally {
+    await session.endSession();
   }
 };
+
 
 // ============================================
 // EXPORT CONTROLLERS

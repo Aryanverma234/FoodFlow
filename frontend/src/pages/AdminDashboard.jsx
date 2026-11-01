@@ -10,6 +10,7 @@ const menuItems = [
   { id: "overview", icon: "📊", label: "Overview" },
   { id: "restaurants", icon: "🏪", label: "Restaurants" },
   { id: "owners", icon: "👥", label: "Restaurant Owners" },
+  { id: "customers", icon: "🧑‍🤝‍🧑", label: "Customers" },
   { id: "orders", icon: "🛍️", label: "All Orders" },
 ];
 
@@ -18,13 +19,18 @@ function AdminDashboard() {
 
   const [restaurants, setRestaurants] = useState([]);
   const [owners, setOwners] = useState([]);
+  const [customers, setCustomers] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [ownersLoading, setOwnersLoading] = useState(true);
+  const [customersLoading, setCustomersLoading] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
   const [approvingId, setApprovingId] = useState("");
   const [creatingOwner, setCreatingOwner] = useState(false);
+  const [updatingCustomerId, setUpdatingCustomerId] = useState("");
 
   const [showOwnerForm, setShowOwnerForm] = useState(false);
   const [activeSection, setActiveSection] = useState("overview");
@@ -33,6 +39,7 @@ function AdminDashboard() {
   const [adminOrders, setAdminOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [adminStats, setAdminStats] = useState(null);
+
   const [orderSearch, setOrderSearch] = useState("");
   const [orderFilter, setOrderFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
@@ -93,6 +100,27 @@ function AdminDashboard() {
     }
   };
 
+  // FETCH ALL CUSTOMERS
+  const fetchCustomers = async () => {
+    try {
+      setCustomersLoading(true);
+
+      const response = await axios.get(
+        `${API_URL}/admin/customers`,
+        authConfig
+      );
+
+      setCustomers(response.data.customers || []);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Customers load nahi ho paye."
+      );
+    } finally {
+      setCustomersLoading(false);
+    }
+  };
+
   // FETCH ALL PLATFORM ORDERS
   const fetchAdminOrders = async () => {
     try {
@@ -106,6 +134,7 @@ function AdminDashboard() {
       setAdminOrders(response.data.orders || []);
     } catch (err) {
       console.error("Admin orders load error:", err);
+
       setError(
         err.response?.data?.message ||
           "Orders load nahi ho paye."
@@ -129,10 +158,12 @@ function AdminDashboard() {
     }
   };
 
+  // INITIAL DATA
   useEffect(() => {
     if (token) {
       fetchRestaurants();
       fetchOwners();
+      fetchCustomers();
       fetchAdminOrders();
       fetchAdminStats();
     }
@@ -175,6 +206,35 @@ function AdminDashboard() {
       );
     } finally {
       setApprovingId("");
+    }
+  };
+
+  // TOGGLE CUSTOMER STATUS
+  const handleToggleCustomerStatus = async (customerId) => {
+    try {
+      setUpdatingCustomerId(customerId);
+      setError("");
+      setSuccess("");
+
+      const response = await axios.patch(
+        `${API_URL}/admin/customers/${customerId}/status`,
+        {},
+        authConfig
+      );
+
+      setSuccess(
+        response.data.message ||
+          "Customer status updated successfully!"
+      );
+
+      await fetchCustomers();
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Customer status update nahi ho paya."
+      );
+    } finally {
+      setUpdatingCustomerId("");
     }
   };
 
@@ -305,7 +365,9 @@ function AdminDashboard() {
     String(order.orderStatus || order.status || "PLACED").toUpperCase();
 
   const getPaymentStatus = (order) =>
-    String(order.paymentStatus || order.payment?.status || "PENDING").toUpperCase();
+    String(
+      order.paymentStatus || order.payment?.status || "PENDING"
+    ).toUpperCase();
 
   const getCustomerName = (order) =>
     order.user?.name || order.customer?.name || "Unknown Customer";
@@ -377,6 +439,10 @@ function AdminDashboard() {
 
   const approvedCount = restaurants.length - pendingCount;
 
+  const activeCustomersCount = customers.filter(
+    (customer) => customer.isActive
+  ).length;
+
   const currentSection =
     menuItems.find((item) => item.id === activeSection) ||
     menuItems[0];
@@ -399,7 +465,9 @@ function AdminDashboard() {
       icon: "🛍️",
       title: "Total Orders",
       value: adminStats?.totalOrders ?? adminOrders.length,
-      note: `₹${Number(adminStats?.totalRevenue ?? 0).toLocaleString("en-IN")} Revenue`,
+      note: `₹${Number(
+        adminStats?.totalRevenue ?? 0
+      ).toLocaleString("en-IN")} Revenue`,
     },
     {
       icon: "⏳",
@@ -538,8 +606,8 @@ function AdminDashboard() {
                   </h1>
 
                   <p>
-                    Manage your restaurants, owners and orders
-                    from one place.
+                    Manage your restaurants, owners, customers and
+                    orders from one place.
                   </p>
                 </div>
 
@@ -1040,6 +1108,148 @@ function AdminDashboard() {
               >
                 {ownersLoading ? "Loading..." : "↻ Refresh Owners"}
               </button>
+            </section>
+          )}
+
+          {/* CUSTOMERS */}
+          {activeSection === "customers" && (
+            <section className="admin-section">
+              <div className="admin-section-heading">
+                <div>
+                  <span className="admin-eyebrow">
+                    USER MANAGEMENT
+                  </span>
+
+                  <h2>Customer Management</h2>
+
+                  <p>
+                    View registered customers and manage their account
+                    status.
+                  </p>
+                </div>
+
+                <span className="admin-section-icon">🧑‍🤝‍🧑</span>
+              </div>
+
+              {/* CUSTOMER SUMMARY */}
+              <div className="admin-order-summary">
+                <article>
+                  <span>Total Customers</span>
+                  <strong>{customers.length}</strong>
+                </article>
+
+                <article>
+                  <span>Active Customers</span>
+                  <strong>{activeCustomersCount}</strong>
+                </article>
+
+                <article>
+                  <span>Inactive Customers</span>
+                  <strong>
+                    {customers.length - activeCustomersCount}
+                  </strong>
+                </article>
+              </div>
+
+              {/* CUSTOMER TOOLBAR */}
+              <div className="admin-management-toolbar">
+                <div>
+                  <span className="admin-owner-total">
+                    {customers.length}
+                  </span>
+                  <span>Registered Customers</span>
+                </div>
+
+                <button
+                  type="button"
+                  className="admin-outline-btn"
+                  onClick={fetchCustomers}
+                  disabled={customersLoading}
+                >
+                  {customersLoading
+                    ? "Loading..."
+                    : "↻ Refresh Customers"}
+                </button>
+              </div>
+
+              {/* CUSTOMER LIST */}
+              {customersLoading ? (
+                <div className="admin-empty-state">
+                  <div>⏳</div>
+                  <h3>Loading customers...</h3>
+                  <p>
+                    Please wait while we fetch customer details.
+                  </p>
+                </div>
+              ) : customers.length === 0 ? (
+                <div className="admin-empty-state">
+                  <div>🧑‍🤝‍🧑</div>
+                  <h3>No customers found</h3>
+                  <p>
+                    Registered customer accounts will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="admin-owner-grid admin-customer-grid">
+                  {customers.map((customer) => (
+                    <article
+                      className="admin-owner-card admin-customer-card"
+                      key={customer._id}
+                    >
+                      <div className="admin-owner-card-top">
+                        <div className="admin-owner-avatar">
+                          {(customer.name || "C")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </div>
+
+                        <span
+                          className={
+                            customer.isActive
+                              ? "admin-owner-active"
+                              : "admin-owner-inactive"
+                          }
+                        >
+                          {customer.isActive
+                            ? "● Active"
+                            : "● Inactive"}
+                        </span>
+                      </div>
+
+                      <h3>{customer.name || "Unnamed Customer"}</h3>
+
+                      <p className="admin-owner-email">
+                        {customer.email || "Email not available"}
+                      </p>
+
+                      <div className="admin-owner-info">
+                        <span>
+                          📞 {customer.phone || "Phone not added"}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={
+                          customer.isActive
+                            ? "admin-customer-toggle-btn deactivate"
+                            : "admin-customer-toggle-btn activate"
+                        }
+                        disabled={updatingCustomerId === customer._id}
+                        onClick={() =>
+                          handleToggleCustomerStatus(customer._id)
+                        }
+                      >
+                        {updatingCustomerId === customer._id
+                          ? "Updating..."
+                          : customer.isActive
+                          ? "Deactivate Customer"
+                          : "Activate Customer"}
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 

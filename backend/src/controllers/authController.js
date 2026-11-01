@@ -1,3 +1,4 @@
+
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
@@ -91,6 +92,14 @@ const loginUser = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
+      });
+    }
+
+    // BLOCK DEACTIVATED USERS
+    if (user.isActive === false) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been deactivated. Please contact the administrator.",
       });
     }
 

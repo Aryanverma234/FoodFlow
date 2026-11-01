@@ -1592,3 +1592,107 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================
+   ADMIN CUSTOMERS SECTION
+========================================= */
+
+.admin-customer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.admin-customer-card {
+  min-width: 0;
+  padding: 21px;
+  border: 1px solid #e7e9e1;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 14px rgba(22, 55, 37, .035);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.admin-customer-card:hover {
+  transform: translateY(-3px);
+  border-color: #cbdaca;
+  box-shadow: 0 8px 22px rgba(22, 55, 37, .07);
+}
+
+.admin-customer-card .admin-owner-card-top {
+  align-items: center;
+}
+
+.admin-customer-card .admin-owner-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  color: #fff;
+  background: var(--admin-green);
+  font-size: 19px;
+}
+
+.admin-customer-card h3 {
+  margin: 15px 0 6px;
+  color: var(--admin-green);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.admin-customer-card .admin-owner-email {
+  line-height: 1.6;
+}
+
+.admin-customer-toggle-btn {
+  width: 100%;
+  min-height: 39px;
+  margin-top: 18px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.admin-customer-toggle-btn.deactivate {
+  color: #a43d35;
+  background: #fff0ed;
+  border-color: #f1d5cf;
+}
+
+.admin-customer-toggle-btn.deactivate:hover {
+  color: #fff;
+  background: #b94b40;
+  border-color: #b94b40;
+}
+
+.admin-customer-toggle-btn.activate {
+  color: #237747;
+  background: #eaf6ed;
+  border-color: #d1e9d8;
+}
+
+.admin-customer-toggle-btn.activate:hover {
+  color: #fff;
+  background: #278052;
+  border-color: #278052;
+}
+
+.admin-customer-toggle-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* Customer section responsive */
+
+@media (max-width: 760px) {
+  .admin-customer-grid {
+    grid-template-columns: 1fr;
+  }
+}

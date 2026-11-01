@@ -4,8 +4,12 @@ const express = require("express");
 const {
   createRestaurantOwner,
   getAllRestaurantOwners,
+  toggleOwnerStatus,
+  getAllCustomers,
+  toggleCustomerStatus,
   getAllAdminRestaurants,
   approveRestaurant,
+  toggleRestaurantStatus,
   getAllAdminOrders,
   getAdminStats,
 } = require("../controllers/adminController");
@@ -15,52 +19,24 @@ const authorizeRoles = require("../middlewares/roleMiddleware");
 
 const router = express.Router();
 
-// Admin-only: Create restaurant owner
-router.post(
-  "/owners",
-  protect,
-  authorizeRoles("admin"),
-  createRestaurantOwner
-);
+// RESTAURANT OWNERS
+router.post("/owners", protect, authorizeRoles("admin"), createRestaurantOwner);
+router.get("/owners", protect, authorizeRoles("admin"), getAllRestaurantOwners);
+router.patch("/owners/:id/status", protect, authorizeRoles("admin"), toggleOwnerStatus);
 
-// Admin-only: Get all restaurant owners
-router.get(
-  "/owners",
-  protect,
-  authorizeRoles("admin"),
-  getAllRestaurantOwners
-);
+// CUSTOMERS
+router.get("/customers", protect, authorizeRoles("admin"), getAllCustomers);
+router.patch("/customers/:id/status", protect, authorizeRoles("admin"), toggleCustomerStatus);
 
-// Admin-only: Get all restaurants
-router.get(
-  "/restaurants",
-  protect,
-  authorizeRoles("admin"),
-  getAllAdminRestaurants
-);
+// RESTAURANTS
+router.get("/restaurants", protect, authorizeRoles("admin"), getAllAdminRestaurants);
+router.patch("/restaurants/:id/approve", protect, authorizeRoles("admin"), approveRestaurant);
+router.patch("/restaurants/:id/status", protect, authorizeRoles("admin"), toggleRestaurantStatus);
 
-// Admin-only: Approve restaurant
-router.patch(
-  "/restaurants/:id/approve",
-  protect,
-  authorizeRoles("admin"),
-  approveRestaurant
-);
+// ORDERS
+router.get("/orders", protect, authorizeRoles("admin"), getAllAdminOrders);
 
-// Admin-only: Get all platform orders
-router.get(
-  "/orders",
-  protect,
-  authorizeRoles("admin"),
-  getAllAdminOrders
-);
-
-// Admin-only: Get platform statistics
-router.get(
-  "/stats",
-  protect,
-  authorizeRoles("admin"),
-  getAdminStats
-);
+// DASHBOARD STATS
+router.get("/stats", protect, authorizeRoles("admin"), getAdminStats);
 
 module.exports = router;

@@ -740,3 +740,67 @@ main.restaurants-page .restaurants-hero-icon {
     padding: 17px;
   }
 }
+/* =====================================
+   FIX: RESTAURANT STATUS & RATING BADGES
+===================================== */
+
+/* OPEN NOW badge */
+main.restaurants-page .restaurant-status.open {
+  background: #13864e !important;
+  color: #ffffff !important;
+  border: 1px solid #13864e;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-shadow: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* CLOSED badge */
+main.restaurants-page .restaurant-status.closed {
+  background: #fff0f0 !important;
+  color: #c62828 !important;
+  border: 1px solid #f2cccc;
+}
+
+/* Rating badge */
+main.restaurants-page .restaurant-rating {
+  background: #13864e !important;
+  color: #ffffff !important;
+  border: 1px solid #13864e;
+  font-weight: 800;
+  text-shadow: none;
+}
+
+/* Rating ke andar star aur text */
+main.restaurants-page .restaurant-rating * {
+  color: #ffffff !important;
+}
+/* =====================================
+   HOME RESTAURANT BADGES - COLOR FIX
+===================================== */
+
+/* OPEN NOW */
+.home-page .home-restaurant-card .restaurant-status {
+  background: #e5f6ec !important;
+  color: #087443 !important;
+  border: 1px solid #b9e6ca;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: none;
+}
+
+/* RATING BADGE */
+.home-page .home-restaurant-card .restaurant-rating {
+  background: #087f4f !important;
+  color: #ffffff !important;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* RATING STAR */
+.home-page .home-restaurant-card .restaurant-rating span {
+  color: #ffd166 !important;
+}

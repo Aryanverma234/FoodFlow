@@ -507,6 +507,7 @@ a {
   height: 74px;
   object-fit: contain;
   object-position: left center;
+  mix-blend-mode: multiply;
 }
 
 @media (max-width: 600px) {

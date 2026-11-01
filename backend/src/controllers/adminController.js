@@ -97,6 +97,110 @@ const getAllRestaurantOwners = async (req, res) => {
 };
 
 // =====================================
+// TOGGLE RESTAURANT OWNER STATUS - ADMIN ONLY
+// =====================================
+const toggleOwnerStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const owner = await User.findOne({
+      _id: id,
+      role: "restaurant",
+    }).select("-password");
+
+    if (!owner) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant owner not found",
+      });
+    }
+
+    owner.isActive = !owner.isActive;
+    await owner.save();
+
+    return res.status(200).json({
+      success: true,
+      message: owner.isActive
+        ? "Restaurant owner activated successfully"
+        : "Restaurant owner deactivated successfully",
+      owner,
+    });
+  } catch (error) {
+    console.error("Admin Toggle Owner Status Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating restaurant owner status",
+    });
+  }
+};
+
+// =====================================
+// GET ALL CUSTOMERS - ADMIN ONLY
+// =====================================
+const getAllCustomers = async (req, res) => {
+  try {
+    const customers = await User.find({
+      role: "customer",
+    })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: customers.length,
+      customers,
+    });
+  } catch (error) {
+    console.error("Admin Get Customers Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching customers",
+    });
+  }
+};
+
+// =====================================
+// TOGGLE CUSTOMER STATUS - ADMIN ONLY
+// =====================================
+const toggleCustomerStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const customer = await User.findOne({
+      _id: id,
+      role: "customer",
+    }).select("-password");
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: "Customer not found",
+      });
+    }
+
+    customer.isActive = !customer.isActive;
+    await customer.save();
+
+    return res.status(200).json({
+      success: true,
+      message: customer.isActive
+        ? "Customer activated successfully"
+        : "Customer deactivated successfully",
+      customer,
+    });
+  } catch (error) {
+    console.error("Admin Toggle Customer Status Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating customer status",
+    });
+  }
+};
+
+// =====================================
 // GET ALL RESTAURANTS - ADMIN ONLY
 // =====================================
 const getAllAdminRestaurants = async (req, res) => {
@@ -157,6 +261,42 @@ const approveRestaurant = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server error while approving restaurant",
+    });
+  }
+};
+
+// =====================================
+// TOGGLE RESTAURANT ACTIVE STATUS - ADMIN ONLY
+// =====================================
+const toggleRestaurantStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const restaurant = await Restaurant.findById(id);
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant not found",
+      });
+    }
+
+    restaurant.isActive = !restaurant.isActive;
+    await restaurant.save();
+
+    return res.status(200).json({
+      success: true,
+      message: restaurant.isActive
+        ? "Restaurant activated successfully"
+        : "Restaurant deactivated successfully",
+      restaurant,
+    });
+  } catch (error) {
+    console.error("Admin Toggle Restaurant Status Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating restaurant status",
     });
   }
 };
@@ -240,4 +380,8 @@ module.exports = {
   getAllRestaurantOwners,
   getAllAdminRestaurants,
   approveRestaurant,
+  toggleRestaurantStatus,
+  toggleOwnerStatus,
+  getAllCustomers,
+  toggleCustomerStatus,
 };

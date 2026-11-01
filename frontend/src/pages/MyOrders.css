@@ -1268,9 +1268,21 @@
 }
 
 @media (max-width: 480px) {
-  .tracker-steps {
-    overflow-x: auto;
+    .tracker-steps {
+    overflow-x: visible;
     padding-bottom: 8px;
+  }
+
+  .tracker-step {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .step-label {
+    font-size: 9px;
+    white-space: normal;
+    line-height: 1.2;
+    max-width: 100%;
   }
 
   .tracker-line {
