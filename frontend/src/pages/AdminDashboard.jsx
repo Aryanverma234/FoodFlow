@@ -1,10 +1,9 @@
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import "./AdminDashboard.css";
 
-const API_URL = "http://localhost:5000/api";
 
 const menuItems = [
   { id: "overview", icon: "📊", label: "Overview" },
@@ -51,11 +50,7 @@ function AdminDashboard() {
     password: "",
   });
 
-  const authConfig = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  
 
   // FETCH RESTAURANTS
   const fetchRestaurants = async () => {
@@ -63,10 +58,7 @@ function AdminDashboard() {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(
-        `${API_URL}/admin/restaurants`,
-        authConfig
-      );
+      const response = await api.get("/admin/restaurants")
 
       setRestaurants(response.data.restaurants || []);
     } catch (err) {
@@ -84,10 +76,7 @@ function AdminDashboard() {
     try {
       setOwnersLoading(true);
 
-      const response = await axios.get(
-        `${API_URL}/admin/owners`,
-        authConfig
-      );
+      const response = await api.get("/admin/owners");
 
       setOwners(response.data.owners || []);
     } catch (err) {
@@ -105,10 +94,7 @@ function AdminDashboard() {
     try {
       setCustomersLoading(true);
 
-      const response = await axios.get(
-        `${API_URL}/admin/customers`,
-        authConfig
-      );
+      const response = await api.get("/admin/customers")
 
       setCustomers(response.data.customers || []);
     } catch (err) {
@@ -126,10 +112,7 @@ function AdminDashboard() {
     try {
       setOrdersLoading(true);
 
-      const response = await axios.get(
-        `${API_URL}/admin/orders`,
-        authConfig
-      );
+      const response = await api.get("/admin/orders")
 
       setAdminOrders(response.data.orders || []);
     } catch (err) {
@@ -147,10 +130,7 @@ function AdminDashboard() {
   // FETCH PLATFORM STATS
   const fetchAdminStats = async () => {
     try {
-      const response = await axios.get(
-        `${API_URL}/admin/stats`,
-        authConfig
-      );
+      const response = await api.get("/admin/stats")
 
       setAdminStats(response.data.stats || null);
     } catch (err) {
@@ -186,11 +166,10 @@ function AdminDashboard() {
       setError("");
       setSuccess("");
 
-      const response = await axios.patch(
-        `${API_URL}/admin/restaurants/${restaurantId}/approve`,
-        {},
-        authConfig
-      );
+      const response = await api.patch(
+  `/admin/restaurants/${restaurantId}/approve`,
+  {}
+);
 
       setSuccess(
         response.data.message ||
@@ -216,11 +195,10 @@ function AdminDashboard() {
       setError("");
       setSuccess("");
 
-      const response = await axios.patch(
-        `${API_URL}/admin/customers/${customerId}/status`,
-        {},
-        authConfig
-      );
+      const response = await api.patch(
+  `/admin/customers/${customerId}/status`,
+  {}
+);
 
       setSuccess(
         response.data.message ||
@@ -257,11 +235,10 @@ function AdminDashboard() {
       setError("");
       setSuccess("");
 
-      const response = await axios.post(
-        `${API_URL}/admin/owners`,
-        ownerForm,
-        authConfig
-      );
+      const response = await api.post(
+  "/admin/owners",
+  ownerForm
+);
 
       setSuccess(
         response.data.message ||

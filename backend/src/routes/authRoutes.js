@@ -1,4 +1,5 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 
 const {
   registerUser,
@@ -7,12 +8,32 @@ const {
 
 const protect = require("../middlewares/authMiddleware");
 const authorizeRoles = require("../middlewares/roleMiddleware");
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many login attempts. Please try again after 15 minutes.",
+  },
+});
 
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many registration attempts. Please try again after 15 minutes.",
+  },
+});
 const router = express.Router();
 
-router.post("/register", registerUser);
+router.post("/register", registerLimiter, registerUser);
 
-router.post("/login", loginUser);
+router.post("/login", loginLimiter, loginUser);
 
 router.get("/me", protect, (req, res) => {
   res.status(200).json({

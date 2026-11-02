@@ -1,10 +1,9 @@
 
 import { useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import "./Register.css";
 
-const API_URL = "http://localhost:5000/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -32,10 +31,7 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        `${API_URL}/auth/register`,
-        formData
-      );
+      const response = await api.post("/auth/register", formData);
 
       setMessage(response.data.message || "Account created successfully!");
 

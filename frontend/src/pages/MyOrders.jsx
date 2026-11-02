@@ -1,10 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
-import axios from "axios";
+import api from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./MyOrders.css";
-
-const API_URL = "http://localhost:5000/api";
 
 const ORDER_STEPS = [
   { key: "PLACED", label: "Placed", icon: "📝" },
@@ -35,11 +33,8 @@ function MyOrders() {
     setOrdersError("");
 
     try {
-      const response = await axios.get(`${API_URL}/orders`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get("/orders");
+
 
       setOrders(response.data.orders || []);
     } catch (error) {
@@ -126,15 +121,9 @@ function MyOrders() {
     setMessage("");
 
     try {
-      const response = await axios.post(
-        `${API_URL}/payments/razorpay/order`,
-        { orderId: selectedOrderId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+     const response = await api.post("/payments/razorpay/order", {
+  orderId: selectedOrderId,
+});
 
       const { keyId, razorpayOrderId, amount, currency } = response.data;
 
@@ -150,20 +139,15 @@ function MyOrders() {
           setPaymentLoadingId(selectedOrderId);
 
           try {
-            const verification = await axios.post(
-              `${API_URL}/payments/razorpay/verify`,
-              {
-                orderId: selectedOrderId,
-                razorpay_order_id: paymentResponse.razorpay_order_id,
-                razorpay_payment_id: paymentResponse.razorpay_payment_id,
-                razorpay_signature: paymentResponse.razorpay_signature,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
+           const verification = await api.post(
+  "/payments/razorpay/verify",
+  {
+    orderId: selectedOrderId,
+    razorpay_order_id: paymentResponse.razorpay_order_id,
+    razorpay_payment_id: paymentResponse.razorpay_payment_id,
+    razorpay_signature: paymentResponse.razorpay_signature,
+  }
+);
 
             navigate("/order-success", {
               state: {

@@ -19,7 +19,12 @@ const protect = async (req, res, next) => {
       token,
       process.env.JWT_SECRET
     );
-
+    if (!decoded.userId || !decoded.userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(401).json({
+        success: false,
+       message: "Invalid authentication token",
+   });
+ }
     // Verify user still exists and is active
     const user = await User.findById(decoded.userId).select("-password");
 

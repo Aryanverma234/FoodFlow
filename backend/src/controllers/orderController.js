@@ -6,6 +6,7 @@ const Cart = require("../models/Cart");
 const Address = require("../models/Address");
 const Restaurant = require("../models/Restaurant");
 const Coupon = require("../models/Coupon");
+const FoodItem = require("../models/FoodItem");
 
 const {
   createOrderNotification,
@@ -86,6 +87,66 @@ const createOrder = async (req, res) => {
       let coupon = null;
       let couponDiscount = 0;
 
+      // Fetch fresh food item details from database
+const foodItemIds = cart.items.map((item) => item.foodItem);
+
+const freshFoodItems = await FoodItem.find({
+  _id: { $in: foodItemIds },
+  restaurant: cart.restaurant,
+  isActive: true,
+  isAvailable: true,
+}).session(session);
+
+if (freshFoodItems.length !== cart.items.length) {
+  fail(
+    400,
+    "One or more food items are unavailable. Please refresh your cart."
+  );
+}
+
+const foodItemsMap = new Map(
+  freshFoodItems.map((item) => [
+    item._id.toString(),
+    item,
+  ])
+);
+
+let freshSubtotal = 0;
+
+const orderItems = cart.items.map((cartItem) => {
+  if (
+    !Number.isInteger(cartItem.quantity) ||
+    cartItem.quantity < 1
+  ) {
+    fail(400, "Invalid item quantity");
+  }
+
+  const foodItem = foodItemsMap.get(
+    cartItem.foodItem.toString()
+  );
+
+  if (!foodItem) {
+    fail(400, "Food item is unavailable");
+  }
+
+  const currentPrice =
+    foodItem.discountPrice ?? foodItem.price;
+
+  const itemSubtotal =
+    currentPrice * cartItem.quantity;
+
+  freshSubtotal += itemSubtotal;
+
+  return {
+    foodItem: foodItem._id,
+    name: foodItem.name,
+    price: currentPrice,
+    quantity: cartItem.quantity,
+    image: foodItem.image,
+    subtotal: itemSubtotal,
+  };
+});
+
       // Validate coupon and calculate discount
       if (couponCode) {
         if (
@@ -117,7 +178,7 @@ const createOrder = async (req, res) => {
           );
         }
 
-        if (cart.subtotal < coupon.minimumOrderAmount) {
+        if (freshSubtotal < coupon.minimumOrderAmount) {
           fail(
             400,
             "Minimum order amount for this coupon is " +
@@ -137,7 +198,7 @@ const createOrder = async (req, res) => {
 
         if (coupon.discountType === "PERCENTAGE") {
           couponDiscount =
-            (cart.subtotal * coupon.discountValue) / 100;
+            (freshSubtotal * coupon.discountValue) / 100;
 
           if (
             coupon.maximumDiscount !== null &&
@@ -150,22 +211,13 @@ const createOrder = async (req, res) => {
         }
 
         // Discount cannot exceed subtotal
-        couponDiscount = Math.min(
+       couponDiscount = Math.min(
           couponDiscount,
-          cart.subtotal
-        );
+           freshSubtotal
+       );
       }
 
-      // Create order item snapshots
-      const orderItems = cart.items.map((item) => ({
-        foodItem: item.foodItem,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        image: item.image,
-        subtotal: item.price * item.quantity,
-      }));
-
+     
       // Save delivery address snapshot
       const deliveryAddress = {
         fullName: address.fullName,
@@ -179,15 +231,14 @@ const createOrder = async (req, res) => {
         country: address.country || "India",
       };
 
-      const totalDiscount =
-        cart.discount + couponDiscount;
+   const totalDiscount = couponDiscount;
 
-      const total = Math.max(
-        0,
-        cart.subtotal +
-          cart.deliveryFee -
-          totalDiscount
-      );
+const deliveryFee = 0;
+
+const total = Math.max(
+  0,
+  freshSubtotal + deliveryFee - totalDiscount
+);
 
       // Create order inside the transaction
       const [order] = await Order.create(
@@ -198,8 +249,8 @@ const createOrder = async (req, res) => {
             restaurant: cart.restaurant,
             items: orderItems,
             deliveryAddress,
-            subtotal: cart.subtotal,
-            deliveryFee: cart.deliveryFee,
+            subtotal: freshSubtotal,
+            deliveryFee: deliveryFee,
             discount: totalDiscount,
             total,
             paymentMethod,
@@ -353,9 +404,10 @@ const getOrderById = async (req, res) => {
 };
 
 // ============================================
-// CANCEL ORDER
-// ============================================
+
 const cancelOrder = async (req, res) => {
+  let session;
+
   try {
     const { id } = req.params;
 
@@ -363,48 +415,80 @@ const cancelOrder = async (req, res) => {
       cancellationReason = "Cancelled by customer",
     } = req.body;
 
-    const order = await Order.findOne({
-      _id: id,
-      user: req.user.userId,
+    session = await mongoose.startSession();
+
+    let cancelledOrder;
+
+    await session.withTransaction(async () => {
+      const order = await Order.findOne({
+        _id: id,
+        user: req.user.userId,
+      }).session(session);
+
+      if (!order) {
+        const error = new Error("Order not found");
+        error.statusCode = 404;
+        throw error;
+      }
+
+      // Only PLACED and CONFIRMED orders can be cancelled
+      if (!["PLACED", "CONFIRMED"].includes(order.orderStatus)) {
+        const error = new Error(
+          "Order can only be cancelled before preparation starts"
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+
+      // Find payment record
+      const payment = await Payment.findOne({
+        order: order._id,
+        user: req.user.userId,
+      }).session(session);
+
+      // Paid online orders require a refund
+      if (
+        order.paymentMethod === "ONLINE" &&
+        order.paymentStatus === "PAID"
+      ) {
+        if (!payment || payment.status !== "SUCCESS") {
+          const error = new Error(
+            "Payment record not found. Please contact support."
+          );
+          error.statusCode = 400;
+          throw error;
+        }
+
+        payment.status = "REFUND_PENDING";
+        await payment.save({ session });
+
+        order.paymentStatus = "REFUND_PENDING";
+      }
+
+      order.orderStatus = "CANCELLED";
+      order.cancellationReason = cancellationReason;
+
+      await order.save({ session });
+
+      cancelledOrder = order;
     });
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
-
-    if (
-      ["DELIVERED", "CANCELLED"].includes(
-        order.orderStatus
-      )
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Order cannot be cancelled because it is already " +
-          order.orderStatus.toLowerCase(),
-      });
-    }
-
-    order.orderStatus = "CANCELLED";
-    order.cancellationReason = cancellationReason;
-
-    await order.save();
 
     return res.status(200).json({
       success: true,
       message: "Order cancelled successfully",
-      order,
+      order: cancelledOrder,
     });
   } catch (error) {
     console.error("Cancel Order Error:", error);
 
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Server error while cancelling order",
+      message: error.message || "Server error while cancelling order",
     });
+  } finally {
+    if (session) {
+      await session.endSession();
+    }
   }
 };
 
@@ -468,21 +552,24 @@ const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { orderStatus } = req.body;
 
-    const allowedStatuses = [
-      "CONFIRMED",
-      "PREPARING",
-      "READY",
-      "OUT_FOR_DELIVERY",
-      "DELIVERED",
-      "CANCELLED",
-    ];
+    const allowedTransitions = {
+  PLACED: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["PREPARING", "CANCELLED"],
+  PREPARING: ["READY"],
+  READY: ["OUT_FOR_DELIVERY"],
+  OUT_FOR_DELIVERY: ["DELIVERED"],
+  DELIVERED: [],
+  CANCELLED: [],
+};
 
-    if (!allowedStatuses.includes(orderStatus)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid order status",
-      });
-    }
+const validStatuses = Object.values(allowedTransitions).flat();
+
+if (!validStatuses.includes(orderStatus)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid order status",
+  });
+}
 
     let updatedOrder;
 
@@ -523,13 +610,48 @@ const updateOrderStatus = async (req, res) => {
         error.statusCode = 400;
         throw error;
       }
+      const nextStatuses =
+  allowedTransitions[order.orderStatus] || [];
+
+if (!nextStatuses.includes(orderStatus)) {
+  const error = new Error(
+    `Cannot change order status from ${order.orderStatus} to ${orderStatus}`
+  );
+
+  error.statusCode = 400;
+  throw error;
+}
 
       order.orderStatus = orderStatus;
 
       if (orderStatus === "CANCELLED") {
-        order.cancellationReason =
-          req.body.cancellationReason || "";
-      }
+  order.cancellationReason =
+    req.body.cancellationReason || "Cancelled by restaurant";
+
+  // Handle refund for paid online orders
+  if (
+    order.paymentMethod === "ONLINE" &&
+    order.paymentStatus === "PAID"
+  ) {
+    const payment = await Payment.findOne({
+      order: order._id,
+      user: order.user,
+    }).session(session);
+
+    if (!payment || payment.status !== "SUCCESS") {
+      const error = new Error(
+        "Payment record not found. Please contact support."
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    payment.status = "REFUND_PENDING";
+    await payment.save({ session });
+
+    order.paymentStatus = "REFUND_PENDING";
+  }
+}
 
       // COD cash received when order is marked DELIVERED
       if (

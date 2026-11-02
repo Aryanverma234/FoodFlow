@@ -1,10 +1,9 @@
 
 import { useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = "http://localhost:5000/api";
 
 function Login() {
   const { setToken, setUser } = useAuth();
@@ -20,7 +19,7 @@ function Login() {
     setMessage("");
 
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
+      const response = await api.post("/auth/login", {
         email,
         password,
       });

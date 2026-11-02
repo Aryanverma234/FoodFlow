@@ -302,6 +302,14 @@ const verifyRazorpayPayment = async (req, res) => {
 
 // Simulate a payment for college project demonstration
 const simulateMockPayment = async (req, res) => {
+  // Mock payments are disabled in production
+  if (process.env.NODE_ENV === "production") {
+    return res.status(403).json({
+      success: false,
+      message: "Mock payments are disabled in production",
+    });
+  }
+
   const session = await Order.startSession();
 
   try {

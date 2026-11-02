@@ -1,70 +1,74 @@
 const Cart = require("../models/Cart");
 const FoodItem = require("../models/FoodItem");
 const Restaurant = require("../models/Restaurant");
+const mongoose = require("mongoose");
 
 const addToCart = async (req, res) => {
   try {
-    console.log("ADD TO CART STARTED");
-
     const { foodItemId, quantity = 1 } = req.body;
 
-    console.log("Food Item ID:", foodItemId);
-    console.log("Quantity:", quantity);
-    console.log("User ID:", req.user.userId);
+   if (!foodItemId) {
+  return res.status(400).json({
+    success: false,
+    message: "Food item is required",
+  });
+}
 
-    if (!foodItemId) {
+if (!mongoose.Types.ObjectId.isValid(foodItemId)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid food item ID",
+  });
+}
+
+const requestedQuantity = Number(quantity);
+    const MAX_QUANTITY = 10;
+
+    
+    if (
+      !Number.isInteger(requestedQuantity) ||
+      requestedQuantity < 1 ||
+      requestedQuantity > MAX_QUANTITY
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Food item is required"
-      });
-    }
-
-    if (Number(quantity) < 1) {
-      return res.status(400).json({
-        success: false,
-        message: "Quantity must be at least 1"
+        message: "Quantity must be a whole number between 1 and 10",
       });
     }
 
     const foodItem = await FoodItem.findOne({
       _id: foodItemId,
       isActive: true,
-      isAvailable: true
+      isAvailable: true,
     });
-
-    console.log("Food item found:", !!foodItem);
 
     if (!foodItem) {
       return res.status(404).json({
         success: false,
-        message: "Food item not found or unavailable"
+        message: "Food item not found or unavailable",
       });
     }
 
     const restaurant = await Restaurant.findOne({
       _id: foodItem.restaurant,
       isApproved: true,
-      isActive: true
+      isActive: true,
     });
-
-    console.log("Restaurant found:", !!restaurant);
 
     if (!restaurant) {
       return res.status(404).json({
         success: false,
-        message: "Restaurant not found or unavailable"
+        message: "Restaurant not found or unavailable",
       });
     }
 
     let cart = await Cart.findOne({
-      user: req.user.userId
+      user: req.user.userId,
     });
 
     const itemPrice =
-      foodItem.discountPrice !== null &&
-      foodItem.discountPrice !== undefined
-        ? foodItem.discountPrice
-        : foodItem.price;
+      foodItem.discountPrice ??
+      foodItem.price;
 
     if (!cart) {
       cart = new Cart({
@@ -75,12 +79,12 @@ const addToCart = async (req, res) => {
             foodItem: foodItem._id,
             name: foodItem.name,
             price: itemPrice,
-            quantity: Number(quantity),
+            quantity: requestedQuantity,
             image: foodItem.image,
             restaurant: foodItem.restaurant,
-            subtotal: itemPrice * Number(quantity)
-          }
-        ]
+            subtotal: itemPrice * requestedQuantity,
+          },
+        ],
       });
 
       await cart.save();
@@ -88,7 +92,7 @@ const addToCart = async (req, res) => {
       return res.status(201).json({
         success: true,
         message: "Item added to cart successfully",
-        cart
+        cart,
       });
     }
 
@@ -99,7 +103,7 @@ const addToCart = async (req, res) => {
       return res.status(400).json({
         success: false,
         message:
-          "You can only add items from one restaurant at a time. Please clear your cart first."
+          "You can only add items from one restaurant at a time. Please clear your cart first.",
       });
     }
 
@@ -109,21 +113,31 @@ const addToCart = async (req, res) => {
     );
 
     if (existingItem) {
-      existingItem.quantity += Number(quantity);
+      const newQuantity =
+        existingItem.quantity + requestedQuantity;
+
+      if (newQuantity > MAX_QUANTITY) {
+        return res.status(400).json({
+          success: false,
+          message: "Maximum 10 units of one item are allowed",
+        });
+      }
+
+      existingItem.quantity = newQuantity;
       existingItem.price = itemPrice;
       existingItem.name = foodItem.name;
       existingItem.image = foodItem.image;
       existingItem.subtotal =
-        existingItem.price * existingItem.quantity;
+        itemPrice * newQuantity;
     } else {
       cart.items.push({
         foodItem: foodItem._id,
         name: foodItem.name,
         price: itemPrice,
-        quantity: Number(quantity),
+        quantity: requestedQuantity,
         image: foodItem.image,
         restaurant: foodItem.restaurant,
-        subtotal: itemPrice * Number(quantity)
+        subtotal: itemPrice * requestedQuantity,
       });
     }
 
@@ -134,7 +148,7 @@ const addToCart = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Item added to cart successfully",
-      cart
+      cart,
     });
   } catch (error) {
     console.error("ADD TO CART ERROR:", error);
@@ -142,10 +156,12 @@ const addToCart = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server error while adding item to cart",
-      error: error.message
+      error: error.message,
     });
   }
 };
+
+
 
 const getMyCart = async (req, res) => {
   try {
@@ -188,16 +204,20 @@ const updateCartItem = async (req, res) => {
   try {
     const { foodItemId } = req.params;
     const { quantity } = req.body;
+const requestedQuantity = Number(quantity);
 
-    if (
-      quantity === undefined ||
-      Number(quantity) < 1
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Quantity must be at least 1"
-      });
-    }
+if (
+  quantity === undefined ||
+  !Number.isInteger(requestedQuantity) ||
+  requestedQuantity < 1 ||
+  requestedQuantity > 10
+) {
+  return res.status(400).json({
+    success: false,
+    message: "Quantity must be a whole number between 1 and 10",
+  });
+}
+     
 
     const cart = await Cart.findOne({
       user: req.user.userId
@@ -234,8 +254,7 @@ const updateCartItem = async (req, res) => {
         message: "Food item is no longer available"
       });
     }
-
-    item.quantity = Number(quantity);
+    item.quantity = requestedQuantity;
 
     item.price =
       foodItem.discountPrice ??

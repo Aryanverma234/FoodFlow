@@ -1,10 +1,9 @@
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import "./RestaurantDashboard.css";
 
-const API_URL = "http://localhost:5000/api";
 
 const initialForm = {
   name: "",
@@ -99,18 +98,14 @@ function RestaurantDashboard() {
   const [foodEditingId, setFoodEditingId] = useState(null);
   const [openFoodMenuId, setOpenFoodMenuId] = useState(null);
 
-  const authHeaders = {
-    Authorization: `Bearer ${token}`,
-  };
+
 
   // Fetch restaurants
   const fetchMyRestaurants = async () => {
     try {
       setLoading(true);
 
-      const response = await axios.get(`${API_URL}/restaurants/my`, {
-        headers: authHeaders,
-      });
+      const response = await api.get("/restaurants/my");
 
       setRestaurants(response.data.restaurants || []);
     } catch (err) {
@@ -145,9 +140,7 @@ function RestaurantDashboard() {
         minimumOrder: Number(form.minimumOrder) || undefined,
       };
 
-      const response = await axios.post(`${API_URL}/restaurants`, payload, {
-        headers: authHeaders,
-      });
+      const response = await api.post("/restaurants", payload);
 
       setMessage(
         response.data.message || "Restaurant successfully created!"
@@ -171,10 +164,7 @@ function RestaurantDashboard() {
     try {
       setCategoryLoading(true);
 
-      const response = await axios.get(
-        `${API_URL}/categories/my/${restaurant._id}`,
-        { headers: authHeaders }
-      );
+      const response = await api.get(`/categories/my/${restaurant._id}`);
 
       setCategories(response.data.categories || []);
     } catch (err) {
@@ -191,10 +181,7 @@ function RestaurantDashboard() {
     try {
       setFoodLoading(true);
 
-      const response = await axios.get(
-        `${API_URL}/food-items/my/${restaurant._id}`,
-        { headers: authHeaders }
-      );
+      const response = await api.get(`/food-items/my/${restaurant._id}`);
 
       setFoodItems(response.data.foodItems || []);
     } catch (err) {
@@ -214,10 +201,7 @@ function RestaurantDashboard() {
       const target = restaurant || selectedRestaurant;
       if (!target) return;
 
-      const response = await axios.get(
-        `${API_URL}/orders/restaurant/${target._id}`,
-        { headers: authHeaders }
-      );
+      const response = await api.get(`/orders/restaurant/${target._id}`);
 
       setOrders(response.data.orders || []);
     } catch (err) {
@@ -238,11 +222,7 @@ function RestaurantDashboard() {
 
       if (reason) payload.cancellationReason = reason;
 
-      const response = await axios.patch(
-        `${API_URL}/orders/${orderId}/status`,
-        payload,
-        { headers: authHeaders }
-      );
+      const response = await api.patch(`/orders/${orderId}/status`, payload);
 
       setMessage(
         response.data.message || `Order status updated to ${newStatus}!`
@@ -339,19 +319,11 @@ function RestaurantDashboard() {
       };
 
       const response = categoryEditingId
-        ? await axios.patch(
-            `${API_URL}/categories/${categoryEditingId}`,
-            payload,
-            { headers: authHeaders }
-          )
-        : await axios.post(
-            `${API_URL}/categories`,
-            {
-              ...payload,
-              restaurant: selectedRestaurant._id,
-            },
-            { headers: authHeaders }
-          );
+  ? await api.patch(`/categories/${categoryEditingId}`, payload)
+  : await api.post("/categories", {
+      ...payload,
+      restaurant: selectedRestaurant._id,
+    });
 
       setMessage(
         response.data.message ||
@@ -420,10 +392,7 @@ function RestaurantDashboard() {
     setError("");
 
     try {
-      const response = await axios.delete(
-        `${API_URL}/categories/${categoryId}`,
-        { headers: authHeaders }
-      );
+      const response = await api.delete(`/categories/${categoryId}`);
 
       if (categoryEditingId === categoryId) {
         setCategoryEditingId(null);
@@ -543,14 +512,8 @@ function RestaurantDashboard() {
       };
 
       const response = foodEditingId
-        ? await axios.patch(
-            `${API_URL}/food-items/${foodEditingId}`,
-            payload,
-            { headers: authHeaders }
-          )
-        : await axios.post(`${API_URL}/food-items`, payload, {
-            headers: authHeaders,
-          });
+        ? await api.patch(`/food-items/${foodEditingId}`, payload)
+        : await api.post("/food-items", payload);
 
       setMessage(
         response.data.message ||
@@ -584,10 +547,7 @@ function RestaurantDashboard() {
     setError("");
 
     try {
-      const response = await axios.delete(
-        `${API_URL}/food-items/${foodItemId}`,
-        { headers: authHeaders }
-      );
+      const response = await api.delete(`/food-items/${foodItemId}`);
 
       if (foodEditingId === foodItemId) {
         setFoodEditingId(null);

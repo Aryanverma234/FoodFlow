@@ -22,7 +22,9 @@ router.get("/order/:orderId", protect, getPaymentByOrder);
 router.post("/razorpay/order", protect, createRazorpayOrder);
 router.post("/razorpay/verify", protect, verifyRazorpayPayment);
 
-// Simulate a mock payment for project demonstration
-router.post("/mock", protect, simulateMockPayment);
+// Mock payment is available only in development
+if (process.env.NODE_ENV !== "production") {
+  router.post("/mock", protect, simulateMockPayment);
+}
 
 module.exports = router;

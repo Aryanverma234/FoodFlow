@@ -1,10 +1,8 @@
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import "./Address.css";
-
-const API_URL = "http://localhost:5000/api";
 
 const initialForm = {
   label: "Home",
@@ -32,15 +30,10 @@ function Address() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
-
+ 
   const fetchAddresses = async () => {
     try {
-      const response = await axios.get(`${API_URL}/addresses`, {
-        headers,
-      });
+     const response = await api.get("/addresses");
       setAddresses(response.data.addresses || []);
       setError("");
     } catch (err) {
@@ -71,12 +64,10 @@ function Address() {
 
     try {
       if (editingId) {
-        await axios.patch(`${API_URL}/addresses/${editingId}`, form, {
-          headers,
-        });
+       await api.patch(`/addresses/${editingId}`, form);
         setMessage("Address updated successfully!");
       } else {
-        await axios.post(`${API_URL}/addresses`, form, { headers });
+        await api.post("/addresses", form);
         setMessage("Address added successfully!");
       }
 
@@ -120,7 +111,7 @@ function Address() {
 
     try {
       setError("");
-      await axios.delete(`${API_URL}/addresses/${id}`, { headers });
+     await api.delete(`/addresses/${id}`);
       setMessage("Address deleted successfully!");
       await fetchAddresses();
     } catch (err) {
@@ -131,9 +122,7 @@ function Address() {
   const handleSetDefault = async (id) => {
     try {
       setError("");
-      await axios.patch(`${API_URL}/addresses/${id}/default`, {}, {
-        headers,
-      });
+      await api.patch(`/addresses/${id}/default`, {});
       setMessage("Default address updated!");
       await fetchAddresses();
     } catch (err) {

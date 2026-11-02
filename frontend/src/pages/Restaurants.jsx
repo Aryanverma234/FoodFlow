@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { useNavigate } from "react-router-dom";
 import "./Restaurants.css";
 
-const API_URL = "http://localhost:5000/api";
 
 function Restaurants() {
   const [restaurants, setRestaurants] = useState([]);
@@ -18,7 +17,7 @@ function Restaurants() {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await axios.get(`${API_URL}/restaurants`);
+        const response = await api.get("/restaurants");
         setRestaurants(response.data.restaurants || []);
       } catch (err) {
         setError(

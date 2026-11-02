@@ -1,11 +1,10 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import { useCart } from "../context/CartContext";
 import "./Menu.css";
 
-const API_URL = "http://localhost:5000/api";
 
 function Menu() {
   const { restaurantId } = useParams();
@@ -32,9 +31,9 @@ function Menu() {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const response = await axios.get(
-          `${API_URL}/food-items/restaurant/${restaurantId}`
-        );
+       const response = await api.get(
+  `/food-items/restaurant/${restaurantId}`
+);
         setFoodItems(response.data.foodItems || []);
       } catch (err) {
         setError(

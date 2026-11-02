@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Home.css";
-
-const API_URL = "http://localhost:5000/api";
+import api from "../api";
 
 const categories = [
   {
@@ -113,22 +112,26 @@ function Home() {
 
   useEffect(() => {
     const fetchRestaurants = async () => {
-      try {
-        const response = await fetch(`${API_URL}/restaurants`);
-        const data = await response.json();
+    try {
+  const response = await api.get("/restaurants");
+  const data = response.data;
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || "Unable to load restaurants");
-        }
+  if (!data.success) {
+    throw new Error(data.message || "Unable to load restaurants");
+  }
 
-        setRestaurants(
-          Array.isArray(data.restaurants) ? data.restaurants : []
-        );
-      } catch (error) {
-        setRestaurantError(error.message || "Something went wrong");
-      } finally {
-        setLoadingRestaurants(false);
-      }
+  setRestaurants(
+    Array.isArray(data.restaurants) ? data.restaurants : []
+  );
+} catch (error) {
+  setRestaurantError(
+    error.response?.data?.message ||
+    error.message ||
+    "Something went wrong"
+  );
+} finally {
+  setLoadingRestaurants(false);
+}  
     };
 
     fetchRestaurants();

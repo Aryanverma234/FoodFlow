@@ -1,12 +1,11 @@
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import "./Checkout.css";
 
-const API_URL = "http://localhost:5000/api";
 
 function Checkout() {
   const navigate = useNavigate();
@@ -22,11 +21,7 @@ function Checkout() {
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        const response = await axios.get(`${API_URL}/addresses`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+       const response = await api.get("/addresses");
 
         const savedAddresses = response.data.addresses || [];
         setAddresses(savedAddresses);
@@ -68,18 +63,10 @@ function Checkout() {
     setError("");
 
     try {
-      const response = await axios.post(
-        `${API_URL}/orders`,
-        {
-          addressId: selectedAddress,
-          paymentMethod,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post("/orders", {
+  addressId: selectedAddress,
+  paymentMethod,
+});
 
       if (response.data.success) {
         const placedOrder = response.data.order || response.data;

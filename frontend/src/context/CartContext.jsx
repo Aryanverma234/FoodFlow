@@ -5,12 +5,10 @@ import {
   useEffect,
   useState,
 } from "react";
-import axios from "axios";
+import api from "../api";
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext(null);
-
-const API_URL = "http://localhost:5000/api";
 
 function normalizeCart(cart) {
   if (!cart || !Array.isArray(cart.items)) {
@@ -41,10 +39,6 @@ export function CartProvider({ children }) {
   const [cartLoading, setCartLoading] = useState(false);
   const [cartError, setCartError] = useState("");
 
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
-
   const loadCart = async () => {
     if (!token) {
       setCartItems([]);
@@ -55,9 +49,7 @@ export function CartProvider({ children }) {
     setCartError("");
 
     try {
-      const response = await axios.get(`${API_URL}/cart`, {
-        headers,
-      });
+      const response = await api.get("/cart");
 
       setCartItems(normalizeCart(response.data.cart));
     } catch (error) {
@@ -82,13 +74,12 @@ export function CartProvider({ children }) {
     setCartError("");
 
     try {
-      const response = await axios.post(
-        `${API_URL}/cart`,
+      const response = await api.post(
+        "/cart",
         {
           foodItemId: item._id,
           quantity: 1,
-        },
-        { headers }
+        }
       );
 
       setCartItems(normalizeCart(response.data.cart));
@@ -110,10 +101,9 @@ export function CartProvider({ children }) {
     setCartError("");
 
     try {
-      const response = await axios.patch(
-        `${API_URL}/cart/item/${itemId}`,
-        { quantity: item.quantity + 1 },
-        { headers }
+      const response = await api.patch(
+        `/cart/item/${itemId}`,
+        { quantity: item.quantity + 1 }
       );
 
       setCartItems(normalizeCart(response.data.cart));
@@ -136,17 +126,15 @@ export function CartProvider({ children }) {
 
     try {
       if (item.quantity === 1) {
-        const response = await axios.delete(
-          `${API_URL}/cart/item/${itemId}`,
-          { headers }
+        const response = await api.delete(
+          `/cart/item/${itemId}`
         );
 
         setCartItems(normalizeCart(response.data.cart));
       } else {
-        const response = await axios.patch(
-          `${API_URL}/cart/item/${itemId}`,
-          { quantity: item.quantity - 1 },
-          { headers }
+        const response = await api.patch(
+          `/cart/item/${itemId}`,
+          { quantity: item.quantity - 1 }
         );
 
         setCartItems(normalizeCart(response.data.cart));
@@ -172,7 +160,7 @@ export function CartProvider({ children }) {
     setCartError("");
 
     try {
-      await axios.delete(`${API_URL}/cart/clear`, { headers });
+      await api.delete("/cart/clear");
       setCartItems([]);
       return true;
     } catch (error) {
