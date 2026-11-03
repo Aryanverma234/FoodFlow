@@ -360,7 +360,7 @@ function App() {
         />
       </Routes>
 
-      {!isAdmin && !isRestaurant && <Footer />}
+      {!isAdmin && !isRestaurant && window.location.pathname === "/" && <Footer />}
     </>
   );
 }

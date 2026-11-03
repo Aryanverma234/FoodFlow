@@ -668,3 +668,66 @@ a {
   transform: translateY(-110%);
   pointer-events: none;
 }
+@media (max-width: 600px) {
+  .navbar {
+    min-height: 60px;
+    height: 60px;
+    padding: 0 15px;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .navbar .logo img {
+    width: 145px;
+    height: 50px;
+  }
+
+  .nav-links {
+    width: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .nav-links .hamburger-button {
+    width: 40px;
+    height: 40px;
+  }
+}
+/* MOBILE NAV LINKS ALIGNMENT */
+@media (max-width: 600px) {
+  .navbar {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .nav-links {
+    width: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+    padding: 6px 0;
+    white-space: nowrap;
+  }
+
+  .nav-links .hamburger-button {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .nav-links {
+    gap: 6px;
+  }
+
+  .nav-links a {
+    font-size: 10px;
+  }
+}

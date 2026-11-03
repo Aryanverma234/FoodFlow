@@ -498,22 +498,260 @@
   }
 }
 
+/* MOBILE CHECKOUT - COMPACT DESIGN */
+
 @media (max-width: 600px) {
   .checkout-page {
-    padding: 28px 15px 45px;
+    padding: 20px 12px 35px;
   }
 
   .checkout-heading {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .checkout-eyebrow {
+    font-size: 10px;
+    margin-bottom: 6px;
+    letter-spacing: 1.7px;
   }
 
   .checkout-heading h1 {
-    font-size: 27px;
+    font-size: 25px;
+    line-height: 1.25;
+    margin-bottom: 6px;
+  }
+
+  .checkout-heading p {
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .checkout-secure {
+    padding: 9px 13px;
+    font-size: 12px;
+  }
+
+  .checkout-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .checkout-main {
+    gap: 14px;
   }
 
   .checkout-section,
   .checkout-summary {
-    padding: 19px;
+    width: 100%;
+    min-width: 0;
+    padding: 15px;
+    border-radius: 14px;
+  }
+
+  .checkout-section-heading {
+    gap: 11px;
+    margin-bottom: 17px;
+  }
+
+  .checkout-step {
+    width: 33px;
+    height: 33px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  .checkout-section-heading h2 {
+    font-size: 17px;
+  }
+
+  .checkout-section-heading p {
+    font-size: 11px;
+    margin: 0;
+  }
+
+  .checkout-address-list {
+    gap: 10px;
+  }
+
+  .checkout-address-option {
+    gap: 10px;
+    padding: 13px;
+    border-radius: 11px;
+  }
+
+  .checkout-custom-radio {
+    width: 17px;
+    height: 17px;
+  }
+
+  .checkout-address-title {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .checkout-address-title strong {
+    font-size: 14px;
+  }
+
+  .checkout-default-tag,
+  .checkout-selected-tag {
+    padding: 3px 6px;
+    font-size: 8px;
+  }
+
+  .checkout-address-content h3 {
+    font-size: 13px;
+  }
+
+  .checkout-address-content p {
+    font-size: 11px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  .checkout-address-phone {
+    font-size: 11px;
+    margin-top: 7px;
+  }
+
+  .checkout-manage-link {
+    margin-top: 12px;
+    font-size: 12px;
+  }
+
+  .checkout-payment-list {
+    gap: 9px;
+  }
+
+  .checkout-payment-option {
+    gap: 11px;
+    padding: 11px;
+    border-radius: 11px;
+  }
+
+  .checkout-payment-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 19px;
+  }
+
+  .checkout-payment-text strong {
+    font-size: 13px;
+  }
+
+  .checkout-payment-text small {
+    font-size: 10px;
+  }
+
+  .checkout-summary {
+    position: static;
+  }
+
+  .checkout-summary-heading {
+    padding-bottom: 14px;
+  }
+
+  .checkout-summary-heading h2 {
+    font-size: 17px;
+  }
+
+  .checkout-summary-items {
+    gap: 13px;
+    padding: 15px 0;
+  }
+
+  .checkout-total-row {
+    margin: 11px 0;
+    font-size: 12px;
+  }
+
+  .checkout-grand-total {
+    padding: 5px 0 14px;
+  }
+
+  .checkout-grand-total strong {
+    font-size: 21px;
+  }
+
+  .checkout-delivery-preview {
+    padding: 11px;
+    margin-bottom: 13px;
+  }
+
+  .checkout-place-order-btn {
+    min-height: 47px;
+    font-size: 13px;
+  }
+
+  .checkout-terms {
+    margin-top: 11px;
+  }
+}
+/* MOBILE ORDER SUMMARY FIX */
+
+@media (max-width: 600px) {
+  .checkout-summary {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .checkout-summary-heading {
+    margin-bottom: 2px;
+  }
+
+  .checkout-summary-heading h2 {
+    font-size: 18px;
+  }
+
+  .checkout-summary-items {
+    gap: 14px;
+    padding: 16px 0;
+  }
+
+  .checkout-summary-item {
+    align-items: center;
+    gap: 8px;
+  }
+
+  .checkout-item-info strong,
+  .checkout-summary-item > strong {
+    font-size: 12px;
+  }
+
+  .checkout-item-info span {
+    font-size: 10px;
+  }
+
+  .checkout-summary-divider {
+    margin: 2px 0 14px;
+  }
+
+  .checkout-total-row {
+    margin: 12px 0;
+    font-size: 12px;
+  }
+
+  .checkout-grand-total {
+    padding: 8px 0 16px;
+  }
+
+  .checkout-grand-total span {
+    font-size: 14px;
+  }
+
+  .checkout-grand-total strong {
+    font-size: 22px;
+  }
+
+  .checkout-delivery-preview {
+    margin-bottom: 14px;
+  }
+
+  .checkout-place-order-btn {
+    width: 100%;
+    min-height: 48px;
   }
 }

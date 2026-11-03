@@ -804,3 +804,335 @@ main.restaurants-page .restaurant-rating * {
 .home-page .home-restaurant-card .restaurant-rating span {
   color: #ffd166 !important;
 }
+/* =====================================
+   FINAL MOBILE RESTAURANTS FIX
+   DESKTOP UNCHANGED
+===================================== */
+
+@media (max-width: 650px) {
+
+  /* Main page */
+  main.restaurants-page {
+    width: 100%;
+    padding: 18px 15px 40px;
+    overflow-x: hidden;
+  }
+
+  /* Hero banner */
+  main.restaurants-page .restaurants-hero {
+    width: 100%;
+    min-height: 145px !important;
+    padding: 22px 17px !important;
+    margin-bottom: 28px;
+    border-radius: 17px;
+    gap: 10px;
+  }
+
+  main.restaurants-page .restaurants-hero h1 {
+    font-size: 24px !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.6px !important;
+  }
+
+  main.restaurants-page .restaurants-hero p {
+    max-width: 260px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  main.restaurants-page .restaurants-hero-icon {
+    width: 58px !important;
+    height: 58px !important;
+    flex-shrink: 0;
+    font-size: 30px !important;
+  }
+
+  /* Search */
+  main.restaurants-page .restaurant-discovery {
+    margin-bottom: 35px;
+  }
+
+  main.restaurants-page .restaurant-search-box {
+    width: 100%;
+    max-width: none;
+    height: 49px;
+    margin-bottom: 25px;
+    padding: 0 13px;
+    border-radius: 12px;
+  }
+
+  main.restaurants-page .restaurant-search-box input {
+    min-width: 0;
+    font-size: 13px;
+  }
+
+  /* Cuisine filters */
+  main.restaurants-page .restaurant-filter-heading h2 {
+    font-size: 19px;
+  }
+
+  main.restaurants-page .restaurant-filter-heading p {
+    font-size: 13px;
+  }
+
+  main.restaurants-page .cuisine-filters {
+    gap: 8px;
+  }
+
+  main.restaurants-page .cuisine-chip {
+    padding: 9px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  /* Results heading */
+  main.restaurants-page .restaurant-results-heading {
+    margin-bottom: 20px;
+    gap: 15px;
+  }
+
+  main.restaurants-page .restaurant-results-heading h2 {
+    font-size: 23px;
+    line-height: 1.25;
+  }
+
+  main.restaurants-page .restaurant-results-heading p {
+    font-size: 13px;
+  }
+
+  /* Sorting */
+  main.restaurants-page .restaurant-sort {
+    width: 100%;
+    gap: 12px;
+  }
+
+  main.restaurants-page .restaurant-sort select {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: 42px;
+  }
+
+  /* Restaurant cards */
+  main.restaurants-page .restaurant-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  main.restaurants-page .restaurant-card {
+    width: 100%;
+    min-width: 0;
+    border-radius: 15px;
+  }
+
+  main.restaurants-page .restaurant-card-image {
+    width: 100%;
+    height: 180px;
+  }
+
+  main.restaurants-page .restaurant-card-content {
+    padding: 15px;
+  }
+
+  main.restaurants-page .restaurant-card-title h3 {
+    font-size: 17px;
+  }
+
+  main.restaurants-page .restaurant-description {
+    font-size: 13px;
+    min-height: auto;
+  }
+
+  main.restaurants-page .restaurant-card-details {
+    font-size: 12px;
+  }
+
+  main.restaurants-page .restaurant-view-button {
+    min-height: 42px;
+    margin-top: 15px;
+  }
+}
+/* =====================================
+   FINAL MOBILE RESTAURANTS DESIGN
+   DESKTOP UNCHANGED
+===================================== */
+
+@media (max-width: 650px) {
+
+  .restaurants-page {
+    padding: 18px 15px 40px;
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .restaurants-hero {
+    min-height: 145px !important;
+    padding: 20px 17px !important;
+    margin-bottom: 25px;
+    border-radius: 17px;
+    gap: 8px;
+  }
+
+  .restaurants-hero h1 {
+    font-size: 23px !important;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+
+  .restaurants-hero p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .restaurants-hero-icon {
+    width: 58px !important;
+    height: 58px !important;
+    font-size: 30px !important;
+  }
+
+  /* SEARCH */
+  .restaurant-search-box {
+    width: 100%;
+    height: 48px;
+    margin-bottom: 25px;
+    padding: 0 13px;
+  }
+
+  .restaurant-search-box input {
+    min-width: 0;
+    font-size: 13px;
+  }
+
+  /* CUISINES */
+  .restaurant-filter-heading h2 {
+    font-size: 19px;
+  }
+
+  .cuisine-filters {
+    gap: 8px;
+  }
+
+  .cuisine-chip {
+    padding: 9px 12px;
+    font-size: 11px;
+  }
+
+  /* RESULTS HEADING */
+  .restaurant-results-heading {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .restaurant-results-heading h2 {
+    font-size: 23px;
+  }
+
+  .restaurant-sort {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .restaurant-sort select {
+    flex: 1;
+    max-width: 220px;
+  }
+
+  /* HORIZONTAL RESTAURANT CARDS */
+  .restaurant-list {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .restaurant-card {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    min-height: 145px;
+    border-radius: 15px;
+  }
+
+  .restaurant-card-image {
+    width: 112px;
+    min-width: 112px;
+    height: auto;
+    min-height: 145px;
+    flex: 0 0 112px;
+  }
+
+  .restaurant-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .restaurant-status {
+    top: 8px;
+    left: 7px;
+    padding: 5px 6px;
+    font-size: 8px;
+  }
+
+  .restaurant-card-content {
+    min-width: 0;
+    flex: 1;
+    padding: 12px 10px;
+  }
+
+  .restaurant-card-title {
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .restaurant-card-title h3 {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .restaurant-rating {
+    padding: 5px 6px;
+    font-size: 10px;
+  }
+
+  .restaurant-description {
+    min-height: auto;
+    margin: 7px 0 5px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .restaurant-cuisines {
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .restaurant-card-divider {
+    margin: 9px 0;
+  }
+
+  .restaurant-card-details {
+    justify-content: flex-start;
+    gap: 6px 12px;
+    font-size: 10px;
+  }
+
+  .restaurant-view-button {
+    min-height: 34px;
+    margin-top: 10px;
+    padding: 7px 9px;
+    font-size: 11px;
+  }
+
+  .restaurant-view-button span {
+    font-size: 15px;
+  }
+}
+@media (max-width: 600px) {
+  .menu-search {
+    min-height: 52px;
+    padding: 16px 18px;
+    font-size: 14px;
+  }
+}

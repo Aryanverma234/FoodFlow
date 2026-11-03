@@ -1,3 +1,7 @@
+/* =====================================
+   FOODFLOW PREMIUM FOOTER
+===================================== */
+
 .footer {
   background: #171717;
   color: #ffffff;
@@ -63,33 +67,89 @@
   font-size: 12px;
 }
 
+/* =====================================
+   TABLET RESPONSIVE
+===================================== */
+
 @media (max-width: 768px) {
+  .footer {
+    margin-top: 25px;
+    padding: 35px 6% 18px;
+  }
+
   .footer-container {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 30px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 18px;
   }
 
   .footer-brand {
     grid-column: 1 / -1;
+  }
+
+  .footer-brand h2 {
+    font-size: 28px;
+  }
+
+  .footer-column {
+    gap: 11px;
+  }
+
+  .footer-bottom {
+    margin-top: 30px;
+    padding-top: 16px;
   }
 }
 
+/* =====================================
+   MOBILE RESPONSIVE
+===================================== */
+
 @media (max-width: 480px) {
   .footer {
-    padding: 40px 6% 20px;
+    margin-top: 15px;
+    padding: 30px 6% 16px;
   }
 
   .footer-container {
-    grid-template-columns: 1fr 1fr;
-    gap: 25px 15px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 14px;
   }
 
   .footer-brand {
     grid-column: 1 / -1;
+  }
+
+  .footer-brand h2 {
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+
+  .footer-brand p {
+    font-size: 13px;
+  }
+
+  .footer-column {
+    gap: 10px;
+  }
+
+  .footer-column h3 {
+    font-size: 15px;
+    margin-bottom: 5px;
+  }
+
+  .footer-column a {
+    font-size: 13px;
   }
 
   .footer-bottom {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+    margin-top: 25px;
+    padding-top: 14px;
+  }
+
+  .footer-bottom p {
+    font-size: 11px;
+    margin: 0;
   }
 }

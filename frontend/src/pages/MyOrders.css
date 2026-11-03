@@ -1304,3 +1304,180 @@
     font-size: 16px;
   }
 }
+/* ===== MY ORDERS - COMPACT MOBILE DESIGN ===== */
+
+@media (max-width: 600px) {
+  .myorders-page {
+    width: 94%;
+    padding: 16px 0 30px;
+  }
+
+  .myorders-header {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .myorders-header h1 {
+    font-size: 25px;
+  }
+
+  .myorders-header p {
+    font-size: 12px;
+  }
+
+  .myorders-refresh-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .myorders-tabs {
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .tab-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .myorders-grid {
+    gap: 14px;
+  }
+
+  .order-card {
+    border-radius: 15px;
+  }
+
+  .order-card-header {
+    padding: 13px 14px;
+    gap: 10px;
+  }
+
+  .restaurant-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .restaurant-name {
+    font-size: 14px;
+  }
+
+  .order-date {
+    font-size: 11px;
+  }
+
+  .order-header-right {
+    gap: 7px;
+  }
+
+  .order-id-pill {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  .status-pill {
+    padding: 5px 9px;
+    font-size: 10px;
+  }
+
+  .order-tracker {
+    padding: 15px 12px 12px;
+  }
+
+  .tracker-steps {
+    gap: 3px;
+  }
+
+  .step-circle {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+
+  .step-label {
+    font-size: 9px;
+  }
+
+  .order-card-body {
+    padding: 14px;
+  }
+
+  .order-items-header h3 {
+    margin-bottom: 10px;
+    font-size: 11px;
+  }
+
+  .order-items-list {
+    gap: 8px;
+  }
+
+  .order-item-row {
+    padding-bottom: 8px;
+    gap: 8px;
+  }
+
+  .item-name,
+  .item-price {
+    font-size: 12px;
+  }
+
+  .item-qty {
+    font-size: 11px;
+  }
+
+  .order-card-footer {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .order-footer-left {
+    gap: 8px;
+  }
+
+  .payment-method-tag {
+    font-size: 11px;
+  }
+
+  .order-footer-right {
+    gap: 10px;
+  }
+
+  .total-value {
+    font-size: 18px;
+  }
+
+  .order-pay-now-btn,
+  .order-reorder-btn {
+    padding: 9px 13px;
+    font-size: 12px;
+  }
+
+  .order-expanded-details {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .myorders-empty-state {
+    padding: 35px 16px;
+    border-radius: 17px;
+  }
+
+  .empty-badge {
+    width: 62px;
+    height: 62px;
+    margin-bottom: 14px;
+  }
+
+  .empty-emoji {
+    font-size: 30px;
+  }
+
+  .myorders-empty-state h2 {
+    font-size: 20px;
+  }
+
+  .myorders-footer {
+    margin-top: 22px;
+    font-size: 11px;
+  }
+}
