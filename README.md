@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=90" alt="FoodFlow food banner" width="100%">
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/banner.png" alt="FoodFlow banner" width="100%">
 
 <br />
 
@@ -10,16 +10,17 @@
 
 **A Modern Food Ordering & Restaurant Management System**
 
-A full-stack web application designed to bring restaurant discovery, food selection, cart management, and online checkout together in one convenient experience.
+A full-stack web application that brings restaurant discovery, food selection, cart management, online checkout and role-based dashboards together in one convenient experience.
 
 <br />
 
-![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge\&logo=react\&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-Build%20Tool-646CFF?style=for-the-badge\&logo=vite\&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-Runtime-339933?style=for-the-badge\&logo=nodedotjs\&logoColor=white)
-![Express](https://img.shields.io/badge/Express-Backend-000000?style=for-the-badge\&logo=express\&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge\&logo=mongodb\&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-F7DF1E?style=for-the-badge\&logo=javascript\&logoColor=black)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-Build%20Tool-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-Runtime-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Razorpay](https://img.shields.io/badge/Razorpay-Payments-0C2451?style=for-the-badge)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
 <br />
 
@@ -34,6 +35,7 @@ A full-stack web application designed to bring restaurant discovery, food select
 # 📑 Table of Contents
 
 * [About FoodFlow](#-about-foodflow)
+* [UI Preview](#️-ui-preview)
 * [Food Gallery](#-food-gallery)
 * [Project Objectives](#-project-objectives)
 * [Problem Statement](#-problem-statement)
@@ -46,8 +48,9 @@ A full-stack web application designed to bring restaurant discovery, food select
 * [Installation and Setup](#-installation-and-setup)
 * [Environment Variables](#-environment-variables)
 * [Application Modules](#-application-modules)
-* [Payment Integration](#-payment-integration)
-* [Security](#-security-considerations)
+* [API Reference](#-api-reference)
+* [Payment Integration](#-razorpay-payment-integration)
+* [Security](#️-security-considerations)
 * [Testing Checklist](#-testing-checklist)
 * [Troubleshooting](#-troubleshooting)
 * [Future Enhancements](#-future-enhancements)
@@ -62,11 +65,9 @@ A full-stack web application designed to bring restaurant discovery, food select
 
 **FoodFlow** is a full-stack web development project focused on creating a modern online food ordering and restaurant management experience.
 
-The application uses a React-based frontend and a Node.js/Express backend. The project is organized into separate frontend and backend directories to make development and maintenance easier.
+The application uses a React-based frontend and a Node.js/Express backend with MongoDB for storage. The project is organized into separate frontend and backend directories to make development and maintenance easier.
 
-FoodFlow brings together the main stages of an online food ordering journey, including discovering food, viewing menus, selecting items, managing a cart, providing delivery information, and proceeding to checkout.
-
-The project also includes Razorpay-related payment integration work.
+FoodFlow covers the complete online food ordering journey: discovering restaurants, viewing menus, selecting items, managing a cart, saving delivery addresses, applying coupons, paying online with Razorpay or with cash on delivery, and tracking orders. Restaurant owners and admins each get their own dashboard.
 
 The overall goal is to develop a practical web application while learning how frontend interfaces, backend APIs, databases, authentication, and third-party services work together.
 
@@ -77,14 +78,47 @@ The overall goal is to develop a practical web application while learning how fr
 | Project Name        | FoodFlow                                                            |
 | Project Category    | Full-Stack Web Development                                          |
 | Application Type    | Food Ordering Web Application                                       |
-| Frontend            | React.js                                                            |
-| Build Tool          | Vite                                                                |
+| User Roles          | Customer, Restaurant Owner, Admin                                   |
+| Frontend            | React.js with Vite                                                  |
 | Backend             | Node.js and Express.js                                              |
-| Database            | MongoDB                                                             |
+| Database            | MongoDB with Mongoose                                               |
+| Authentication      | JWT with role-based access control                                  |
 | Language            | JavaScript                                                          |
-| Payment Integration | Razorpay                                                            |
+| Payment Integration | Razorpay and Cash on Delivery                                       |
 | Repository          | [Aryanverma234/FoodFlow](https://github.com/Aryanverma234/FoodFlow) |
 | Development Status  | In Development                                                      |
+
+---
+
+# 🖼️ UI Preview
+
+A look at the main screens of FoodFlow.
+
+### 🏠 Home Page
+
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/home.png" alt="FoodFlow home page" width="100%">
+
+<details>
+<summary><b>View the full home page</b></summary>
+<br />
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/home-full.png" alt="FoodFlow full home page" width="100%">
+</details>
+
+### 📦 Customer: My Orders
+
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/my-orders.png" alt="My Orders page with live order tracking" width="100%">
+
+### 🍳 Restaurant Dashboard
+
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/restaurant-dashboard.png" alt="Restaurant owner dashboard with live orders" width="100%">
+
+### 🛡️ Admin Dashboard
+
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/admin-dashboard.png" alt="Admin overview dashboard" width="100%">
+
+<p align="center">
+  <i>Screens are shown with sample data for illustration.</i>
+</p>
 
 ---
 
@@ -132,10 +166,10 @@ FoodFlow aims to:
 * Build a modern and user-friendly food ordering website.
 * Develop reusable UI components using React.
 * Implement frontend navigation and application state management.
-* Organize backend routes and server-side logic.
+* Organize backend routes, controllers and server-side logic.
 * Understand frontend-to-backend API communication.
 * Work with database connectivity and data modeling.
-* Develop authentication-related workflows.
+* Develop authentication and role-based authorization workflows.
 * Implement shopping cart and checkout functionality.
 * Integrate an online payment workflow.
 * Apply environment-based configuration.
@@ -154,7 +188,7 @@ FoodFlow explores this solution through an organized web interface and a modular
 
 ## 💡 Proposed Solution
 
-FoodFlow is designed to provide a workflow in which customers can:
+FoodFlow provides a workflow in which customers can:
 
 1. Open the website.
 2. Explore restaurants and food items.
@@ -162,9 +196,9 @@ FoodFlow is designed to provide a workflow in which customers can:
 4. Select items and add them to a cart.
 5. Review quantities and order totals.
 6. Provide delivery information.
-7. Proceed to checkout.
-8. Complete the configured payment workflow.
-9. Access order information where the relevant functionality is implemented.
+7. Apply a coupon and proceed to checkout.
+8. Pay online with Razorpay or choose cash on delivery.
+9. Track the order and view order history.
 
 ---
 
@@ -173,57 +207,37 @@ FoodFlow is designed to provide a workflow in which customers can:
 ## 🖥️ 1. Modern User Interface
 
 * Clean and organized website layout.
-* Green-themed visual identity.
+* Green and saffron visual identity.
 * Consistent typography and spacing.
 * Component-based interface design.
 * Page-based navigation.
 * Responsive design considerations.
 
-## 🔐 2. User Authentication
+## 🔐 2. User Authentication and Roles
 
-The project includes authentication-related pages and context.
-
-Depending on the current implementation, this module may support:
-
-* User login.
-* User registration.
-* Input validation.
-* Authentication state management.
-* Secure password handling.
-* Access to user-specific features.
+* User registration and login.
+* JWT-based authentication.
+* Secure password hashing with bcrypt.
+* Authentication state management with React Context.
+* Role-based access control for customers, restaurant owners and admins.
 
 ## 🍽️ 3. Restaurant Discovery
-
-The restaurant module is designed to organize available restaurant options.
-
-Potential capabilities include:
 
 * Restaurant listings.
 * Restaurant information.
 * Menu navigation.
-* Food discovery.
+* Category-based food discovery and search.
 
 ## 📖 4. Food Menu
 
-The menu module is intended to display available food items and their relevant information.
-
-Possible fields include:
-
-* Food name.
-* Description.
-* Price.
-* Image.
+* Food name, description, price and image.
 * Restaurant association.
+* Menu categories.
 * Availability status.
 
 ## 🛒 5. Shopping Cart
 
-The cart module supports the selection and review of food items.
-
-Its intended responsibilities include:
-
 * Adding items.
-* Reviewing selected products.
 * Updating quantities.
 * Removing items.
 * Calculating subtotals.
@@ -231,37 +245,51 @@ Its intended responsibilities include:
 
 ## 📍 6. Delivery Address
 
-The address module is designed to collect or display the information required for delivery.
+* Save and manage delivery addresses.
+* Select an address at checkout.
 
-## 💳 7. Checkout
+## 💳 7. Checkout and Coupons
 
-The checkout module brings together order details, delivery information, and available payment options.
+* Order review with totals.
+* Coupon codes applied at checkout.
+* Choice of Razorpay (online) or cash on delivery.
 
 ## 💰 8. Razorpay Integration
 
-The project includes Razorpay-related integration work for the payment workflow.
-
-A complete production implementation should also verify payment results on the backend and handle failed or duplicate transactions correctly.
+* Payment order creation on the backend using server-side credentials.
+* Payment verification on the backend.
+* Payment status tracking: `PENDING`, `PAID`, `FAILED`, `REFUNDED`.
 
 ## 📦 9. Order Management
 
-Order-related functionality can organize customer purchases, payment information, and order status where the required backend implementation exists.
+* Order placement, history and status tracking.
+* Order cancellation.
+* Restaurant owners update order status through the lifecycle.
+* Notifications for order updates.
 
-## 🧩 10. Modular Architecture
+## 🍳 10. Restaurant and Admin Dashboards
+
+* **Restaurant dashboard:** profile, menu categories, food items, live orders and coupons.
+* **Admin dashboard:** platform statistics, restaurant approvals, user and order management.
+
+## ⭐ 11. Reviews and Favourites
+
+* Ratings and reviews.
+* Favourite restaurants and dishes.
+
+## 🧩 12. Modular Architecture
 
 * Separate frontend and backend applications.
 * Organized React pages and contexts.
-* Server-side routing.
+* Controller, route, model and middleware layers on the server.
 * Environment-based configuration.
 * Git-based version control.
-
-> **Feature note:** These descriptions cover the project's intended functionality. The presence of a page or installed package does not prove that every associated backend feature is complete.
 
 ---
 
 # 🔄 How It Works
 
-The intended customer journey can be represented as follows:
+The customer journey:
 
 ```text
                 ┌─────────────────────┐
@@ -291,21 +319,24 @@ The intended customer journey can be represented as follows:
                            │
                            ▼
                 ┌─────────────────────┐
-                │      Checkout       │
+                │ Checkout and Coupon │
                 └──────────┬──────────┘
                            │
                            ▼
                 ┌─────────────────────┐
-                │ Payment Processing  │
+                │ Razorpay or Cash on │
+                │      Delivery       │
                 └──────────┬──────────┘
                            │
                            ▼
                 ┌─────────────────────┐
-                │  Order Information  │
+                │    Track Your Order │
                 └─────────────────────┘
 ```
 
-*This diagram illustrates the intended workflow, not a guarantee that every step is fully implemented.*
+### 📦 Order Lifecycle
+
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/order-lifecycle.png" alt="Order lifecycle from placed to delivered" width="100%">
 
 ---
 
@@ -313,15 +344,16 @@ The intended customer journey can be represented as follows:
 
 ## Frontend
 
-| Technology   | Purpose                                  |
-| ------------ | ---------------------------------------- |
-| React.js     | Interactive user interfaces              |
-| Vite         | Development server and build tooling     |
-| JavaScript   | Application logic                        |
-| HTML5        | Page structure                           |
-| CSS3         | Styling and layouts                      |
-| React Router | Client-side navigation                   |
-| Context API  | Shared state management where configured |
+| Technology   | Purpose                              |
+| ------------ | ------------------------------------ |
+| React.js     | Interactive user interfaces          |
+| Vite         | Development server and build tooling |
+| JavaScript   | Application logic                    |
+| HTML5        | Page structure                       |
+| CSS3         | Styling and layouts                  |
+| React Router | Client-side navigation               |
+| Context API  | Shared authentication and cart state |
+| Axios        | HTTP requests to the API             |
 
 ## Backend
 
@@ -330,10 +362,10 @@ The intended customer journey can be represented as follows:
 | Node.js            | JavaScript runtime                 |
 | Express.js         | Backend framework                  |
 | MongoDB            | NoSQL database                     |
-| Mongoose           | MongoDB object modeling, if used   |
+| Mongoose           | MongoDB object modeling            |
 | dotenv             | Environment-variable management    |
-| bcryptjs           | Password-hashing utilities         |
-| jsonwebtoken       | JWT utilities                      |
+| bcryptjs           | Password hashing                   |
+| jsonwebtoken       | JWT authentication                 |
 | cookie-parser      | Cookie parsing                     |
 | Helmet             | HTTP security headers              |
 | Morgan             | Request logging                    |
@@ -348,10 +380,9 @@ The intended customer journey can be represented as follows:
 | Git                | Version control         |
 | GitHub             | Source-code hosting     |
 | npm                | Package management      |
+| ESLint             | Code linting            |
 | Visual Studio Code | Development environment |
 | Chrome DevTools    | Browser debugging       |
-
-The actual dependencies and their usage should be verified in the respective `package.json` files and source code.
 
 ---
 
@@ -359,57 +390,19 @@ The actual dependencies and their usage should be verified in the respective `pa
 
 FoodFlow follows a frontend-backend architecture.
 
-```text
-┌──────────────────────────────────┐
-│              USER                │
-│         Browser / Device          │
-└────────────────┬─────────────────┘
-                 │
-                 ▼
-┌──────────────────────────────────┐
-│             FRONTEND             │
-│                                  │
-│           React + Vite           │
-│                                  │
-│ Pages • Components • Context      │
-└────────────────┬─────────────────┘
-                 │
-                 │ HTTP / API Requests
-                 ▼
-┌──────────────────────────────────┐
-│              BACKEND             │
-│                                  │
-│        Node.js + Express         │
-│                                  │
-│ Routes • Middleware • Logic       │
-└────────────────┬─────────────────┘
-                 │
-                 ▼
-┌──────────────────────────────────┐
-│              DATABASE            │
-│                                  │
-│             MongoDB              │
-└──────────────────────────────────┘
-
-       External Payment Service
-                 │
-                 ▼
-              Razorpay
-```
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/architecture.png" alt="FoodFlow system architecture" width="100%">
 
 ### Architecture Explanation
 
-1. **Frontend:** Displays pages and handles user interactions.
-2. **API layer:** Sends requests between the frontend and backend.
-3. **Backend:** Validates requests and runs server-side logic.
-4. **Database:** Stores persistent application information when configured.
-5. **Payment service:** Supports the external payment workflow.
+1. **Frontend:** React pages and components display data and handle user interactions.
+2. **API layer:** Axios sends REST requests with a JWT to the backend.
+3. **Backend:** Express routes, authentication and role middleware, and controllers run the business logic.
+4. **Database:** MongoDB stores users, restaurants, menus, carts, orders, coupons, reviews and more through Mongoose models.
+5. **Payment service:** Razorpay processes online payments, and the backend verifies the result.
 
 ---
 
 # 📂 Project Structure
-
-The repository separates the frontend and backend into their own directories.
 
 ```text
 FoodFlow/
@@ -417,42 +410,48 @@ FoodFlow/
 ├── frontend/
 │   ├── public/
 │   ├── src/
-│   │   ├── components/
 │   │   ├── context/
-│   │   │   ├── AuthContext
-│   │   │   └── CartContext
+│   │   │   ├── AuthContext.jsx
+│   │   │   └── CartContext.jsx
 │   │   │
 │   │   ├── pages/
-│   │   │   ├── Home
-│   │   │   ├── Login
-│   │   │   ├── Restaurants
-│   │   │   ├── Menu
-│   │   │   ├── Cart
-│   │   │   ├── Address
-│   │   │   ├── Checkout
-│   │   │   └── MyOrders
+│   │   │   ├── Home.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   ├── Restaurants.jsx
+│   │   │   ├── Menu.jsx
+│   │   │   ├── Cart.jsx
+│   │   │   ├── Address.jsx
+│   │   │   ├── Checkout.jsx
+│   │   │   ├── OrderSuccess.jsx
+│   │   │   ├── MyOrders.jsx
+│   │   │   ├── Settings.jsx
+│   │   │   ├── RestaurantDashboard.jsx
+│   │   │   └── AdminDashboard.jsx
 │   │   │
 │   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css
+│   │   ├── Footer.jsx
+│   │   └── main.jsx
 │   │
-│   ├── package.json
-│   └── vite.config.js
-│
-├── backend/
-│   ├── models/
-│   ├── routes/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── config/
-│   ├── server.js
 │   └── package.json
 │
+├── backend/
+│   ├── src/
+│   │   ├── config/          # Database connection
+│   │   ├── controllers/     # Request handlers
+│   │   ├── middlewares/     # Authentication and role checks
+│   │   ├── models/          # Mongoose schemas
+│   │   ├── routes/          # API route definitions
+│   │   ├── services/        # Shared business logic
+│   │   ├── app.js
+│   │   └── server.js
+│   │
+│   └── package.json
+│
+├── docs/                    # README images
 ├── .gitignore
 └── README.md
 ```
-
-*This is a logical overview. Your actual folder structure may differ. Keep the documented filenames aligned with the files that really exist.*
 
 ---
 
@@ -483,10 +482,12 @@ Download: [Git](https://git-scm.com/)
 
 ### 3. MongoDB
 
-If required by the backend, configure a local MongoDB server or a MongoDB Atlas database.
+Use a local MongoDB server or a MongoDB Atlas database.
 
 * [MongoDB](https://www.mongodb.com/)
 * [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas)
+
+> Order placement uses MongoDB transactions, which need a **replica set**. MongoDB Atlas provides this by default.
 
 ### 4. Code Editor
 
@@ -510,66 +511,40 @@ Move into the project directory:
 cd FoodFlow
 ```
 
-If you already have the project on your computer, open the existing folder instead.
-
-## Step 2: Install Frontend Dependencies
-
-```bash
-cd frontend
-npm install
-```
-
-## Step 3: Install Backend Dependencies
-
-Open a separate terminal from the project root:
+## Step 2: Install Backend Dependencies
 
 ```bash
 cd backend
 npm install
 ```
 
-## Step 4: Configure the Backend
+## Step 3: Configure the Backend
 
-Create the required environment file and provide the appropriate configuration values.
+Create a `.env` file inside the `backend` folder. See the next section for the full template.
 
-See the next section for an example.
-
-## Step 5: Start the Backend
-
-Run the script configured in `backend/package.json`.
-
-To inspect available scripts:
-
-```bash
-npm run
-```
-
-If a `dev` script exists:
+## Step 4: Start the Backend
 
 ```bash
 npm run dev
 ```
 
-If a `start` script exists:
+Or run it without auto-reload:
 
 ```bash
 npm start
 ```
 
-Run these commands from the backend directory.
-
-## Step 6: Start the Frontend
+## Step 5: Install and Start the Frontend
 
 Open another terminal:
 
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
-Vite will display the local development address.
-
-The current development setup has used:
+Vite displays the local development address, usually:
 
 **http://localhost:5173/**
 
@@ -583,33 +558,25 @@ Environment variables keep application configuration separate from the source co
 
 ## Backend `.env`
 
-If the backend uses these variable names, a template may look like this:
+Create `backend/.env`:
 
 ```env
 PORT=5000
 
-MONGO_URI=your_mongodb_connection_string
+MONGODB_URI=mongodb://127.0.0.1:27017/foodflow
 
 JWT_SECRET=replace_with_a_long_random_secret
 
-FRONTEND_URL=http://localhost:5173
+JWT_EXPIRES_IN=7d
 
 RAZORPAY_KEY_ID=your_razorpay_test_key_id
 
 RAZORPAY_KEY_SECRET=your_razorpay_test_key_secret
 ```
 
-**Important:** These are example names. Match the variable names to those actually read by your backend code.
+## Frontend Configuration
 
-## Frontend Environment Variables
-
-If the frontend expects a configurable backend URL, it may use a variable such as:
-
-```env
-VITE_API_URL=http://localhost:5000
-```
-
-Only add this variable if your frontend code reads `import.meta.env.VITE_API_URL`.
+The frontend currently calls the API at `http://localhost:5000/api`, and the backend allows requests from `http://localhost:5173` (set in `backend/src/app.js`). Update both when you deploy the app to another host.
 
 ### Security Rules
 
@@ -623,35 +590,60 @@ Only add this variable if your frontend code reads `import.meta.env.VITE_API_URL
 
 # 🧩 Application Modules
 
-| Module       | Responsibility                               |
-| ------------ | -------------------------------------------- |
-| Home         | Main landing page                            |
-| Login        | User authentication interface                |
-| Restaurants  | Restaurant discovery                         |
-| Menu         | Food item presentation                       |
-| Cart         | Selected items and quantities                |
-| Address      | Delivery information                         |
-| Checkout     | Order review and payment workflow            |
-| My Orders    | Order information where implemented          |
-| Auth Context | Shared authentication state where configured |
-| Cart Context | Shared cart state where configured           |
+| Module              | Responsibility                                      |
+| ------------------- | --------------------------------------------------- |
+| Home                | Main landing page                                   |
+| Login / Register    | User authentication                                 |
+| Restaurants         | Restaurant discovery                                |
+| Menu                | Food item presentation                              |
+| Cart                | Selected items and quantities                       |
+| Address             | Delivery information                                |
+| Checkout            | Order review, coupons and payment                   |
+| Order Success       | Order confirmation                                  |
+| My Orders           | Order history, tracking and cancellation            |
+| Settings            | Account settings                                    |
+| Restaurant Dashboard| Menu, orders and coupons for restaurant owners      |
+| Admin Dashboard     | Platform statistics and management                  |
+| Auth Context        | Shared authentication state                         |
+| Cart Context        | Shared cart state                                   |
 
-The availability of each feature depends on the current application implementation.
+---
+
+# 📡 API Reference
+
+All routes are prefixed with `/api`.
+
+| Route             | Purpose                                  |
+| ----------------- | ---------------------------------------- |
+| `/auth`           | Registration and login                   |
+| `/users`          | Profile and account settings             |
+| `/restaurants`    | Restaurant listing and management        |
+| `/categories`     | Menu categories                          |
+| `/food-items`     | Dishes                                   |
+| `/cart`           | Cart operations                          |
+| `/addresses`      | Saved delivery addresses                 |
+| `/orders`         | Place, track, update and cancel orders   |
+| `/coupons`        | Coupon management and validation         |
+| `/reviews`        | Ratings and reviews                      |
+| `/favorites`      | Favourite restaurants and dishes         |
+| `/notifications`  | In-app notifications                     |
+| `/payments`       | Razorpay order creation and verification |
+| `/admin`          | Admin statistics and management          |
 
 ---
 
 # 💳 Razorpay Payment Integration
 
-FoodFlow includes Razorpay-related payment integration work.
+FoodFlow supports online payments through Razorpay, along with cash on delivery.
 
-A typical payment workflow involves:
+The payment workflow:
 
 1. The user proceeds from the cart to checkout.
 2. The backend creates a payment order using server-side credentials.
 3. The frontend opens the payment interface.
 4. The user completes or cancels the payment.
 5. The backend verifies the payment result.
-6. The application records the appropriate order and payment status.
+6. The application records the order and payment status.
 
 ### Payment Security
 
@@ -671,30 +663,24 @@ Official documentation: [Razorpay Docs](https://razorpay.com/docs/)
 
 # 🛡️ Security Considerations
 
-Security should be considered throughout development.
-
 ### Authentication
 
-* Validate user input.
-* Hash passwords securely.
-* Verify tokens or sessions on the backend.
-* Protect routes that require authentication.
-* Apply appropriate session-expiration rules.
+* Passwords are hashed with bcrypt.
+* Tokens are verified on the backend.
+* Routes are protected by authentication and role middleware.
 
 ### API Security
 
-* Configure CORS correctly.
-* Use security-related HTTP headers.
-* Validate request bodies and parameters.
-* Apply rate limiting where appropriate.
-* Handle errors without exposing sensitive details.
+* `helmet` sets security-related HTTP headers.
+* CORS is restricted to the frontend origin.
+* `express-rate-limit` limits repeated requests.
+* Errors should not expose sensitive details.
 
 ### Database Security
 
 * Protect database credentials.
 * Restrict database access.
 * Validate incoming data.
-* Avoid exposing internal database information.
 
 ### Production Deployment
 
@@ -703,8 +689,6 @@ Security should be considered throughout development.
 * Update dependencies.
 * Configure production environment variables.
 * Test payment verification before accepting real payments.
-
-Installing security-related packages does not automatically make an application secure. Their configuration and actual use must be verified.
 
 ---
 
@@ -716,7 +700,7 @@ Use this checklist to verify the application before a demonstration or deploymen
 
 * [ ] Home page loads successfully.
 * [ ] Navigation works correctly.
-* [ ] Login page loads.
+* [ ] Login and registration work.
 * [ ] Restaurant and menu pages display expected information.
 * [ ] Cart operations work correctly.
 * [ ] Address and checkout pages load.
@@ -727,10 +711,10 @@ Use this checklist to verify the application before a demonstration or deploymen
 
 * [ ] Server starts successfully.
 * [ ] Environment variables are configured.
-* [ ] Database connection works where required.
+* [ ] Database connection works.
 * [ ] API endpoints return expected responses.
 * [ ] Invalid requests are handled safely.
-* [ ] Authentication checks work correctly.
+* [ ] Authentication and role checks work correctly.
 * [ ] Errors do not expose sensitive information.
 
 ### Payments
@@ -738,7 +722,7 @@ Use this checklist to verify the application before a demonstration or deploymen
 * [ ] Test credentials are configured.
 * [ ] Successful payment flow is tested.
 * [ ] Failed and cancelled payments are handled.
-* [ ] Server-side verification is implemented.
+* [ ] Server-side verification works.
 * [ ] Duplicate processing is handled appropriately.
 
 ### Repository
@@ -747,8 +731,6 @@ Use this checklist to verify the application before a demonstration or deploymen
 * [ ] No secrets are committed.
 * [ ] Required dependencies are declared.
 * [ ] Project setup works on a fresh environment.
-
-*These are suggested verification tasks, not a claim that every test has already passed.*
 
 ---
 
@@ -777,17 +759,20 @@ npm install
 
 Check:
 
-* Is the backend running?
-* Is the API URL correct?
-* Are the ports configured correctly?
-* Is CORS configured correctly?
+* Is the backend running on port 5000?
+* Does the frontend call `http://localhost:5000/api`?
+* Is CORS allowing `http://localhost:5173`?
 * Are required environment variables present?
 
 Inspect the browser console and Network tab for errors.
 
 ## MongoDB Connection Error
 
-Verify the connection string, database credentials, network permissions, and database availability.
+Verify the `MONGODB_URI`, database credentials, network permissions, and database availability.
+
+## Transaction Error When Placing an Order
+
+Order placement uses MongoDB transactions. Run MongoDB as a replica set, or use MongoDB Atlas.
 
 ## Payment Does Not Complete
 
@@ -805,46 +790,32 @@ Stop the process using the requested port or configure an available alternative.
 
 # 🔮 Future Enhancements
 
-The following improvements can be considered for future versions.
+## Deployment and Configuration
 
-## Customer Experience
+* Deploy the frontend and backend with MongoDB Atlas.
+* Move the API base URL and CORS origin into environment variables.
+* Continuous integration and deployment.
 
-* 🔍 Food search and filters.
-* ⭐ Restaurant ratings and reviews.
-* ❤️ Favourite food items.
-* 📦 Order tracking.
-* 🔔 Order notifications.
-* 📱 Improved mobile experience.
+## Quality and Reliability
 
-## Restaurant Management
+* Automated unit and integration tests.
+* Server-side request validation.
+* Centralized error handling.
+* API documentation with Swagger or Postman.
 
-* Restaurant owner dashboard.
-* Menu creation and editing.
-* Food availability management.
-* Incoming order management.
-* Order status updates.
-* Sales reports.
+## Features
 
-## Administration
-
-* Admin dashboard.
-* User and restaurant management.
-* Order monitoring.
-* Role-based access control.
-* Analytics and reporting.
+* Refund handling for cancelled paid orders.
+* Real-time order updates with WebSockets.
+* Pagination for order lists and admin tables.
+* Sales reports and analytics.
+* Improved mobile experience.
 
 ## Technical Improvements
 
-* Automated unit and integration tests.
-* API documentation.
-* Better error handling.
 * Image optimization.
-* Pagination and server-side filtering.
-* Continuous integration and deployment.
 * Accessibility improvements.
 * Production monitoring.
-
-These are proposed enhancements and should not be interpreted as already implemented features.
 
 ---
 
@@ -855,10 +826,10 @@ Developing FoodFlow provides practical exposure to:
 * React component-based development.
 * Frontend routing and shared state.
 * JavaScript application logic.
-* REST API concepts.
+* REST API design.
 * Node.js and Express.
-* Database connectivity.
-* Authentication workflows.
+* MongoDB, Mongoose and transactions.
+* Authentication and role-based authorization.
 * Environment-based configuration.
 * Third-party payment integration.
 * Debugging and error handling.
@@ -901,15 +872,14 @@ Please avoid committing credentials, private configuration files, or unrelated c
 
 ## Aryan Verma
 
-**BCA Student | Full-Stack Web Development Learner**
+**BCA Student | Full-Stack Web Developer**
 
 Interested in building practical web applications and exploring modern software development technologies.
 
 <br />
 
-[![GitHub](https://img.shields.io/badge/GitHub-Aryanverma234-181717?style=for-the-badge\&logo=github)](https://github.com/Aryanverma234)
-
-[![FoodFlow Repository](https://img.shields.io/badge/Project-FoodFlow-2E8B57?style=for-the-badge\&logo=github)](https://github.com/Aryanverma234/FoodFlow)
+[![GitHub](https://img.shields.io/badge/GitHub-Aryanverma234-181717?style=for-the-badge&logo=github)](https://github.com/Aryanverma234)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-aryan--verma277-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/aryan-verma277)
 
 </div>
 
