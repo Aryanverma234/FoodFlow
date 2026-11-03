@@ -14,6 +14,8 @@ const initialForm = {
   cuisine: "",
   deliveryTime: "",
   minimumOrder: "",
+  logo: "",
+  coverImage: "",
 };
 
 const initialCategoryForm = {
@@ -72,6 +74,8 @@ function RestaurantDashboard() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [editingRestaurantId, setEditingRestaurantId] = useState(null);
+  const [savingRestaurant, setSavingRestaurant] = useState(false);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -159,6 +163,94 @@ function RestaurantDashboard() {
     }
   };
 
+  // Edit existing restaurant
+const handleEditRestaurant = (restaurant) => {
+  setEditingRestaurantId(restaurant._id);
+
+  setForm({
+    name: restaurant.name || "",
+    description: restaurant.description || "",
+    phone: restaurant.phone || "",
+    email: restaurant.email || "",
+    address: restaurant.address
+      ? [
+          restaurant.address.street,
+          restaurant.address.city,
+          restaurant.address.state,
+          restaurant.address.pincode,
+        ]
+          .filter(Boolean)
+          .join(", ")
+      : "",
+    cuisine: Array.isArray(restaurant.cuisine)
+      ? restaurant.cuisine.join(", ")
+      : restaurant.cuisine || "",
+    deliveryTime: restaurant.deliveryTime ?? "",
+    minimumOrder: restaurant.minimumOrder ?? "",
+    logo: restaurant.logo || "",
+    coverImage: restaurant.coverImage || "",
+  });
+
+  setMessage("");
+  setError("");
+  setShowForm(true);
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+// Save updated restaurant
+const handleSaveRestaurant = async (e) => {
+  e.preventDefault();
+  setMessage("");
+  setError("");
+
+  try {
+    setSavingRestaurant(true);
+
+    const addressParts = form.address
+      .split(",")
+      .map((part) => part.trim());
+
+    const payload = {
+      ...form,
+      address: {
+        street: addressParts[0] || "",
+        city: addressParts[1] || "",
+        state: addressParts[2] || "",
+        pincode: addressParts[3] || "",
+      },
+      cuisine: form.cuisine
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      deliveryTime: Number(form.deliveryTime) || 30,
+      minimumOrder: Number(form.minimumOrder) || 0,
+    };
+
+    const response = await api.patch(
+      `/restaurants/${editingRestaurantId}`,
+      payload
+    );
+
+    setMessage(
+      response.data.message || "Restaurant updated successfully!"
+    );
+
+    setForm(initialForm);
+    setEditingRestaurantId(null);
+    setShowForm(false);
+
+    await fetchMyRestaurants();
+  } catch (err) {
+    setError(
+      err.response?.data?.message || "Restaurant update nahi ho paya."
+    );
+  } finally {
+    setSavingRestaurant(false);
+  }
+};
   // Fetch categories
   const fetchCategories = async (restaurant) => {
     try {
@@ -683,15 +775,35 @@ function RestaurantDashboard() {
           <button
             type="button"
             className="rd-primary-btn"
-            onClick={() => setShowForm(!showForm)}
+           onClick={() => {
+  if (showForm) {
+    setShowForm(false);
+  } else {
+    setShowForm(true);
+  }
+
+  setEditingRestaurantId(null);
+  setForm(initialForm);
+  setMessage("");
+  setError("");
+}}
           >
             {showForm ? "Cancel" : "+ Add Restaurant"}
           </button>
         </div>
 
         {showForm && (
-          <form className="rd-form" onSubmit={handleCreateRestaurant}>
-            <h3>Create Your Restaurant</h3>
+          <form
+  className="rd-form"
+  onSubmit={
+    editingRestaurantId
+      ? handleSaveRestaurant
+      : handleCreateRestaurant
+  }
+>
+            <h3>
+  {editingRestaurantId ? "Edit Restaurant" : "Create Your Restaurant"}
+</h3>
 
             <div className="rd-form-grid">
               <input
@@ -741,7 +853,21 @@ function RestaurantDashboard() {
                 value={form.minimumOrder}
                 onChange={handleChange}
               />
+<input
+  name="logo"
+  type="url"
+  placeholder="Restaurant Logo Image URL"
+  value={form.logo}
+  onChange={handleChange}
+/>
 
+<input
+  name="coverImage"
+  type="url"
+  placeholder="Restaurant Cover Image URL"
+  value={form.coverImage}
+  onChange={handleChange}
+/>
               <textarea
                 className="rd-full-field"
                 name="description"
@@ -759,13 +885,19 @@ function RestaurantDashboard() {
               />
             </div>
 
-            <button
-              className="rd-primary-btn"
-              type="submit"
-              disabled={creating}
-            >
-              {creating ? "Creating..." : "Create Restaurant"}
-            </button>
+          <button
+  className="rd-primary-btn"
+  type="submit"
+  disabled={creating || savingRestaurant}
+>
+  {editingRestaurantId
+    ? savingRestaurant
+      ? "Saving..."
+      : "Save Changes"
+    : creating
+      ? "Creating..."
+      : "Create Restaurant"}
+</button>
           </form>
         )}
 
@@ -820,10 +952,18 @@ function RestaurantDashboard() {
                   </span>
 
                   <span>
-                    🍴 {restaurant.cuisine || "Cuisine not added"}
+                    🍴 {Array.isArray(restaurant.cuisine)
+  ? restaurant.cuisine.join(", ") || "Cuisine not added"
+  : restaurant.cuisine || "Cuisine not added"}
                   </span>
                 </div>
-
+               <button
+  type="button"
+  className="rd-outline-btn"
+  onClick={() => handleEditRestaurant(restaurant)}
+>
+  ✏️ Edit Restaurant
+</button>
                 <button
                   type="button"
                   className="rd-manage-btn"

@@ -5,6 +5,7 @@ const {
   getAllRestaurants,
   getRestaurantById,
   getMyRestaurants,
+  updateRestaurant,
   approveRestaurant,
 } = require("../controllers/restaurantController");
 
@@ -39,6 +40,16 @@ router.post(
   protect,
   authorizeRoles("restaurant"),
   createRestaurant
+);
+// =====================================
+// UPDATE RESTAURANT
+// RESTAURANT OWNER ONLY
+// =====================================
+router.patch(
+  "/:id",
+  protect,
+  authorizeRoles("restaurant"),
+  updateRestaurant
 );
 
 // =====================================

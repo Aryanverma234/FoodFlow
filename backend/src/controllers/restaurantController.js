@@ -6,15 +6,17 @@ const Restaurant = require("../models/Restaurant");
 const createRestaurant = async (req, res) => {
   try {
     const {
-      name,
-      description,
-      phone,
-      email,
-      address,
-      cuisine,
-      deliveryTime,
-      minimumOrder,
-    } = req.body;
+    name,
+    description,
+    phone,
+    email,
+    address,
+    cuisine,
+    deliveryTime,
+    minimumOrder,
+    logo,
+    coverImage,
+   } = req.body;
 
     if (!name) {
       return res.status(400).json({
@@ -33,6 +35,8 @@ const createRestaurant = async (req, res) => {
       cuisine,
       deliveryTime,
       minimumOrder,
+      logo,
+      coverImage,
     });
 
     res.status(201).json({
@@ -138,6 +142,62 @@ const getMyRestaurants = async (req, res) => {
 };
 
 // ===============================
+// UPDATE RESTAURANT
+// RESTAURANT OWNER ONLY
+// ===============================
+const updateRestaurant = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const restaurant = await Restaurant.findOne({
+      _id: id,
+      owner: req.user.userId,
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant not found or unauthorized",
+      });
+    }
+
+    const allowedFields = [
+      "name",
+      "description",
+      "phone",
+      "email",
+      "address",
+      "cuisine",
+      "deliveryTime",
+      "minimumOrder",
+      "logo",
+      "coverImage",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        restaurant[field] = req.body[field];
+      }
+    });
+
+    await restaurant.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Restaurant updated successfully",
+      restaurant,
+    });
+  } catch (error) {
+    console.error("Update Restaurant Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating restaurant",
+    });
+  }
+};
+
+// ===============================
 // APPROVE RESTAURANT
 // ADMIN ONLY
 // ===============================
@@ -181,5 +241,6 @@ module.exports = {
   getAllRestaurants,
   getRestaurantById,
   getMyRestaurants,
+  updateRestaurant,
   approveRestaurant,
 };
