@@ -465,8 +465,8 @@
 
 .home-restaurant-card {
   min-width: 0;
-  display: grid;
-  grid-template-columns: 38% 62%;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid #eeece5;
   border-radius: 13px;
@@ -485,8 +485,8 @@
 }
 
 .restaurant-visual {
-  height: 100%;
-  min-height: 175px;
+  height: 190px;
+  min-height: 190px;
   position: relative;
   overflow: hidden;
   background: #e7e0d2;
@@ -1524,6 +1524,7 @@
 /* MOBILE RESTAURANT CARDS */
 @media (max-width: 650px) {
   .home-page .home-restaurant-card {
+     display: grid;
     grid-template-columns: 34% 66%;
     border-radius: 14px;
     min-height: 155px;
@@ -1565,5 +1566,11 @@
   .home-page .restaurant-order-link {
     min-height: 30px;
     font-size: 11px;
+  }
+}
+/* Desktop: 3 restaurant cards in one row */
+@media (min-width: 651px) {
+  .home-page .restaurant-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
