@@ -11,7 +11,7 @@ const api = axios.create({
 // Automatically attach login token to every request
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("foodflow_token");
+    const token = sessionStorage.getItem("foodflow_token");
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

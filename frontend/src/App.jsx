@@ -223,15 +223,17 @@ function App() {
         </div>
       </nav>
 
-      <Routes>
-        <Route
-          path="/"
-          element={
-            token && (isAdmin || isRestaurant)
-              ? <Navigate to={dashboardPath} replace />
-              : <Home />
-          }
-        />
+     <Routes>
+  <Route
+    path="/"
+    element={
+      !token
+        ? <Navigate to="/login" replace />
+        : isAdmin || isRestaurant
+          ? <Navigate to={dashboardPath} replace />
+          : <Home />
+    }
+  />
 
         <Route
           path="/admin/dashboard"

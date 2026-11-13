@@ -10,12 +10,14 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => {
-    return localStorage.getItem("foodflow_token") || "";
+    return sessionStorage.getItem("foodflow_token") || "";
   });
 
   const [user, setUser] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("foodflow_user")) || null;
+      return JSON.parse(
+        sessionStorage.getItem("foodflow_user")
+      ) || null;
     } catch {
       return null;
     }
@@ -23,24 +25,29 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem("foodflow_token", token);
+      sessionStorage.setItem("foodflow_token", token);
     } else {
-      localStorage.removeItem("foodflow_token");
-      localStorage.removeItem("foodflow_user");
+      sessionStorage.removeItem("foodflow_token");
+      sessionStorage.removeItem("foodflow_user");
       setUser(null);
     }
   }, [token]);
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem("foodflow_user", JSON.stringify(user));
+      sessionStorage.setItem(
+        "foodflow_user",
+        JSON.stringify(user)
+      );
     } else {
-      localStorage.removeItem("foodflow_user");
+      sessionStorage.removeItem("foodflow_user");
     }
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ token, setToken, user, setUser }}>
+    <AuthContext.Provider
+      value={{ token, setToken, user, setUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
