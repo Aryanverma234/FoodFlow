@@ -90,15 +90,7 @@ The overall goal is to develop a practical web application while learning how fr
 
 # 🎬 Project Showcase
 
-<div align="center">
-
-<a href="https://github.com/Aryanverma234/FoodFlow/raw/refs/heads/main/docs/FoodFlow_Final_Showcase.mp4">
-  <img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/demo-thumb.png" alt="Watch the FoodFlow showcase video" width="100%">
-</a>
-
-**▶️ [Watch the full FoodFlow showcase video](https://github.com/Aryanverma234/FoodFlow/raw/refs/heads/main/docs/FoodFlow_Final_Showcase.mp4)**
-
-</div>
+https://VIDEO-LINK-YAHAN-PASTE-
 
 ---
 
