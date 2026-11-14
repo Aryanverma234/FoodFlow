@@ -36,7 +36,6 @@ A full-stack web application that brings restaurant discovery, food selection, c
 
 * [About FoodFlow](#-about-foodflow)
 * [UI Preview](#️-ui-preview)
-* [Food Gallery](#-food-gallery)
 * [Project Objectives](#-project-objectives)
 * [Problem Statement](#-problem-statement)
 * [Key Features](#-key-features)
@@ -149,43 +148,6 @@ A look at the main screens of FoodFlow.
 
 <p align="center">
   <i>Real screenshots from the running application (Razorpay test mode).</i>
-</p>
-
----
-
-# 🍕 Food Gallery
-
-FoodFlow is inspired by the convenience and visual appeal of modern online food ordering platforms.
-
-<table>
-<tr>
-<td width="50%">
-<img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=85" alt="Freshly prepared pizza" width="100%">
-<h3 align="center">🍕 Pizza & Italian Food</h3>
-<p align="center">Explore delicious food options and restaurant menus.</p>
-</td>
-<td width="50%">
-<img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=85" alt="Gourmet burger" width="100%">
-<h3 align="center">🍔 Burgers & Fast Food</h3>
-<p align="center">A convenient food discovery experience.</p>
-</td>
-</tr>
-<tr>
-<td width="50%">
-<img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=85" alt="Healthy fresh food bowl" width="100%">
-<h3 align="center">🥗 Fresh & Healthy</h3>
-<p align="center">Browse different types of food in one place.</p>
-</td>
-<td width="50%">
-<img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=85" alt="Grilled food platter" width="100%">
-<h3 align="center">🔥 Grilled Specialities</h3>
-<p align="center">Discover more food inspiration.</p>
-</td>
-</tr>
-</table>
-
-<p align="center">
-  <i>Food photographs are illustrative and do not necessarily represent live products available in the application.</i>
 </p>
 
 ---
