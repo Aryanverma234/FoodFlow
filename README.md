@@ -90,7 +90,7 @@ The overall goal is to develop a practical web application while learning how fr
 
 # 🎬 Project Showcase
 
-https://VIDEO-LINK-YAHAN-PASTE-
+https://github.com/user-attachments/assets/18d56508-1e0e-4588-985e-d24c8b71a673
 
 ---
 
