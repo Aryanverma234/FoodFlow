@@ -35,6 +35,7 @@ A full-stack web application that brings restaurant discovery, food selection, c
 # 📑 Table of Contents
 
 * [About FoodFlow](#-about-foodflow)
+* [Project Showcase](#-project-showcase)
 * [UI Preview](#️-ui-preview)
 * [Project Objectives](#-project-objectives)
 * [Problem Statement](#-problem-statement)
@@ -50,10 +51,8 @@ A full-stack web application that brings restaurant discovery, food selection, c
 * [API Reference](#-api-reference)
 * [Payment Integration](#-razorpay-payment-integration)
 * [Security](#️-security-considerations)
-* [Testing Checklist](#-testing-checklist)
 * [Troubleshooting](#-troubleshooting)
 * [Future Enhancements](#-future-enhancements)
-* [Learning Outcomes](#-learning-outcomes)
 * [Contributing](#-contributing)
 * [Author](#-author)
 * [License](#-license)
@@ -86,6 +85,20 @@ The overall goal is to develop a practical web application while learning how fr
 | Payment Integration | Razorpay and Cash on Delivery                                       |
 | Repository          | [Aryanverma234/FoodFlow](https://github.com/Aryanverma234/FoodFlow) |
 | Development Status  | In Development                                                      |
+
+---
+
+# 🎬 Project Showcase
+
+<div align="center">
+
+<a href="https://github.com/Aryanverma234/FoodFlow/blob/main/docs/FoodFlow_Final_Showcase.mp4">
+  <img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/demo-thumb.png" alt="Watch the FoodFlow showcase video" width="100%">
+</a>
+
+**▶️ [Watch the full FoodFlow showcase video](https://github.com/Aryanverma234/FoodFlow/blob/main/docs/FoodFlow_Final_Showcase.mp4)**
+
+</div>
 
 ---
 
@@ -686,48 +699,6 @@ Official documentation: [Razorpay Docs](https://razorpay.com/docs/)
 
 ---
 
-# 🧪 Testing Checklist
-
-Use this checklist to verify the application before a demonstration or deployment.
-
-### Frontend
-
-* [ ] Home page loads successfully.
-* [ ] Navigation works correctly.
-* [ ] Login and registration work.
-* [ ] Restaurant and menu pages display expected information.
-* [ ] Cart operations work correctly.
-* [ ] Address and checkout pages load.
-* [ ] Error states are handled appropriately.
-* [ ] Layout works on different screen sizes.
-
-### Backend
-
-* [ ] Server starts successfully.
-* [ ] Environment variables are configured.
-* [ ] Database connection works.
-* [ ] API endpoints return expected responses.
-* [ ] Invalid requests are handled safely.
-* [ ] Authentication and role checks work correctly.
-* [ ] Errors do not expose sensitive information.
-
-### Payments
-
-* [ ] Test credentials are configured.
-* [ ] Successful payment flow is tested.
-* [ ] Failed and cancelled payments are handled.
-* [ ] Server-side verification works.
-* [ ] Duplicate processing is handled appropriately.
-
-### Repository
-
-* [ ] README commands match the actual scripts.
-* [ ] No secrets are committed.
-* [ ] Required dependencies are declared.
-* [ ] Project setup works on a fresh environment.
-
----
-
 # 🔧 Troubleshooting
 
 ## `npm` Is Not Recognized
@@ -813,26 +784,6 @@ Stop the process using the requested port or configure an available alternative.
 
 ---
 
-# 📚 Learning Outcomes
-
-Developing FoodFlow provides practical exposure to:
-
-* React component-based development.
-* Frontend routing and shared state.
-* JavaScript application logic.
-* REST API design.
-* Node.js and Express.
-* MongoDB, Mongoose and transactions.
-* Authentication and role-based authorization.
-* Environment-based configuration.
-* Third-party payment integration.
-* Debugging and error handling.
-* Git and GitHub.
-* Full-stack application architecture.
-* Technical documentation.
-
----
-
 # 🤝 Contributing
 
 Suggestions and contributions are welcome.
@@ -881,17 +832,11 @@ Interested in building practical web applications and exploring modern software 
 
 # 📄 License
 
-A license has not yet been specified in this README.
-
-Before allowing others to reuse or distribute the project, choose an appropriate license and add a corresponding `LICENSE` file to the repository. Until then, do not assume that the project is available under a particular open-source license.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
 <div align="center">
-
-<img src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85" alt="Fresh food and ingredients" width="100%">
-
-<br />
 
 ### ❤️ Made with passion for food and technology.
 
