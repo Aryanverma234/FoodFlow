@@ -98,6 +98,12 @@ A look at the main screens of FoodFlow.
 
 <img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/home.png" alt="FoodFlow home page" width="100%">
 
+<details>
+<summary><b>View the full home page</b></summary>
+<br />
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/home-full.png" alt="FoodFlow full home page" width="100%">
+</details>
+
 ### 🔐 Login
 
 <img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/login.png" alt="Login page" width="100%">
@@ -133,8 +139,16 @@ A look at the main screens of FoodFlow.
 
 <img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/my-orders.png" alt="My Orders page with live order tracking" width="100%">
 
+### 🍳 Restaurant Dashboard
+
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/restaurant-dashboard.png" alt="Restaurant owner dashboard with live orders" width="100%">
+
+### 🛡️ Admin Dashboard
+
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/admin-dashboard.png" alt="Admin overview dashboard" width="100%">
+
 <p align="center">
-  <i>Screens are shown with demo data in Razorpay test mode.</i>
+  <i>Real screenshots from the running application (Razorpay test mode).</i>
 </p>
 
 ---
@@ -354,9 +368,7 @@ The customer journey:
 
 ### 📦 Order Lifecycle
 
-```text
-Placed → Confirmed → Cooking → Ready → On the Way → Delivered
-```
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/order-lifecycle.png" alt="Order lifecycle from placed to delivered" width="100%">
 
 ---
 
@@ -410,19 +422,7 @@ Placed → Confirmed → Cooking → Ready → On the Way → Delivered
 
 FoodFlow follows a frontend-backend architecture.
 
-```text
-┌──────────────────┐   REST + JWT   ┌──────────────────────────┐   Mongoose   ┌──────────────┐
-│  React (Vite)    │ ─────────────► │  Express API             │ ───────────► │   MongoDB    │
-│  Pages, Context  │ ◄───────────── │  Routes → Middleware →   │ ◄─────────── │  (Replica    │
-│  Axios           │     JSON       │  Controllers → Services  │              │   Set)       │
-└──────────────────┘                └────────────┬─────────────┘              └──────────────┘
-                                                 │
-                                                 ▼
-                                        ┌──────────────────┐
-                                        │     Razorpay     │
-                                        │ Order + Verify   │
-                                        └──────────────────┘
-```
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/architecture.png" alt="FoodFlow system architecture" width="100%">
 
 ### Architecture Explanation
 
