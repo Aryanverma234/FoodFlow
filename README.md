@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/banner.png" alt="FoodFlow banner" width="100%">
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/banner.jpg" alt="FoodFlow banner" width="100%">
 
 <br />
 
@@ -98,26 +98,43 @@ A look at the main screens of FoodFlow.
 
 <img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/home.png" alt="FoodFlow home page" width="100%">
 
-<details>
-<summary><b>View the full home page</b></summary>
-<br />
-<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/home-full.png" alt="FoodFlow full home page" width="100%">
-</details>
+### 🔐 Login
+
+<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/login.png" alt="Login page" width="100%">
+
+### 🍽️ Restaurants & Menu
+
+<table>
+<tr>
+<td width="50%"><img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/restaurants.png" alt="Restaurant listing" width="100%"></td>
+<td width="50%"><img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/menu.png" alt="Restaurant menu" width="100%"></td>
+</tr>
+</table>
+
+### 🛒 Cart & Checkout
+
+<table>
+<tr>
+<td width="50%"><img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/cart.png" alt="Cart" width="100%"></td>
+<td width="50%"><img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/checkout.png" alt="Checkout" width="100%"></td>
+</tr>
+</table>
+
+### 💳 Razorpay Payment
+
+<table>
+<tr>
+<td width="50%"><img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/razorpay-success.png" alt="Razorpay payment success" width="100%"></td>
+<td width="50%"><img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/order-success.png" alt="Order confirmed" width="100%"></td>
+</tr>
+</table>
 
 ### 📦 Customer: My Orders
 
 <img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/my-orders.png" alt="My Orders page with live order tracking" width="100%">
 
-### 🍳 Restaurant Dashboard
-
-<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/restaurant-dashboard.png" alt="Restaurant owner dashboard with live orders" width="100%">
-
-### 🛡️ Admin Dashboard
-
-<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/admin-dashboard.png" alt="Admin overview dashboard" width="100%">
-
 <p align="center">
-  <i>Screens are shown with sample data for illustration.</i>
+  <i>Screens are shown with demo data in Razorpay test mode.</i>
 </p>
 
 ---
@@ -233,6 +250,7 @@ FoodFlow provides a workflow in which customers can:
 * Food name, description, price and image.
 * Restaurant association.
 * Menu categories.
+* Veg / Non-Veg filters and search.
 * Availability status.
 
 ## 🛒 5. Shopping Cart
@@ -336,7 +354,9 @@ The customer journey:
 
 ### 📦 Order Lifecycle
 
-<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/order-lifecycle.png" alt="Order lifecycle from placed to delivered" width="100%">
+```text
+Placed → Confirmed → Cooking → Ready → On the Way → Delivered
+```
 
 ---
 
@@ -390,7 +410,19 @@ The customer journey:
 
 FoodFlow follows a frontend-backend architecture.
 
-<img src="https://raw.githubusercontent.com/Aryanverma234/FoodFlow/main/docs/architecture.png" alt="FoodFlow system architecture" width="100%">
+```text
+┌──────────────────┐   REST + JWT   ┌──────────────────────────┐   Mongoose   ┌──────────────┐
+│  React (Vite)    │ ─────────────► │  Express API             │ ───────────► │   MongoDB    │
+│  Pages, Context  │ ◄───────────── │  Routes → Middleware →   │ ◄─────────── │  (Replica    │
+│  Axios           │     JSON       │  Controllers → Services  │              │   Set)       │
+└──────────────────┘                └────────────┬─────────────┘              └──────────────┘
+                                                 │
+                                                 ▼
+                                        ┌──────────────────┐
+                                        │     Razorpay     │
+                                        │ Order + Verify   │
+                                        └──────────────────┘
+```
 
 ### Architecture Explanation
 
@@ -590,22 +622,22 @@ The frontend currently calls the API at `http://localhost:5000/api`, and the bac
 
 # 🧩 Application Modules
 
-| Module              | Responsibility                                      |
-| ------------------- | --------------------------------------------------- |
-| Home                | Main landing page                                   |
-| Login / Register    | User authentication                                 |
-| Restaurants         | Restaurant discovery                                |
-| Menu                | Food item presentation                              |
-| Cart                | Selected items and quantities                       |
-| Address             | Delivery information                                |
-| Checkout            | Order review, coupons and payment                   |
-| Order Success       | Order confirmation                                  |
-| My Orders           | Order history, tracking and cancellation            |
-| Settings            | Account settings                                    |
-| Restaurant Dashboard| Menu, orders and coupons for restaurant owners      |
-| Admin Dashboard     | Platform statistics and management                  |
-| Auth Context        | Shared authentication state                         |
-| Cart Context        | Shared cart state                                   |
+| Module               | Responsibility                                 |
+| -------------------- | ---------------------------------------------- |
+| Home                 | Main landing page                              |
+| Login / Register     | User authentication                            |
+| Restaurants          | Restaurant discovery                           |
+| Menu                 | Food item presentation                         |
+| Cart                 | Selected items and quantities                  |
+| Address              | Delivery information                           |
+| Checkout             | Order review, coupons and payment              |
+| Order Success        | Order confirmation                             |
+| My Orders            | Order history, tracking and cancellation       |
+| Settings             | Account settings                               |
+| Restaurant Dashboard | Menu, orders and coupons for restaurant owners |
+| Admin Dashboard      | Platform statistics and management             |
+| Auth Context         | Shared authentication state                    |
+| Cart Context         | Shared cart state                              |
 
 ---
 
@@ -613,22 +645,22 @@ The frontend currently calls the API at `http://localhost:5000/api`, and the bac
 
 All routes are prefixed with `/api`.
 
-| Route             | Purpose                                  |
-| ----------------- | ---------------------------------------- |
-| `/auth`           | Registration and login                   |
-| `/users`          | Profile and account settings             |
-| `/restaurants`    | Restaurant listing and management        |
-| `/categories`     | Menu categories                          |
-| `/food-items`     | Dishes                                   |
-| `/cart`           | Cart operations                          |
-| `/addresses`      | Saved delivery addresses                 |
-| `/orders`         | Place, track, update and cancel orders   |
-| `/coupons`        | Coupon management and validation         |
-| `/reviews`        | Ratings and reviews                      |
-| `/favorites`      | Favourite restaurants and dishes         |
-| `/notifications`  | In-app notifications                     |
-| `/payments`       | Razorpay order creation and verification |
-| `/admin`          | Admin statistics and management          |
+| Route            | Purpose                                  |
+| ---------------- | ---------------------------------------- |
+| `/auth`          | Registration and login                   |
+| `/users`         | Profile and account settings             |
+| `/restaurants`   | Restaurant listing and management        |
+| `/categories`    | Menu categories                          |
+| `/food-items`    | Dishes                                   |
+| `/cart`          | Cart operations                          |
+| `/addresses`     | Saved delivery addresses                 |
+| `/orders`        | Place, track, update and cancel orders   |
+| `/coupons`       | Coupon management and validation         |
+| `/reviews`       | Ratings and reviews                      |
+| `/favorites`     | Favourite restaurants and dishes         |
+| `/notifications` | In-app notifications                     |
+| `/payments`      | Razorpay order creation and verification |
+| `/admin`         | Admin statistics and management          |
 
 ---
 
