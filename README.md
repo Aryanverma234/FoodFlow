@@ -24,7 +24,7 @@ A full-stack web application that brings restaurant discovery, food selection, c
 
 <br />
 
-[🚀 View Repository](https://github.com/Aryanverma234/FoodFlow) · [🐛 Report an Issue](https://github.com/Aryanverma234/FoodFlow/issues)
+[🌐 Live Demo](https://food-flow-mauve.vercel.app) · [🚀 View Repository](https://github.com/Aryanverma234/FoodFlow) · [🐛 Report an Issue](https://github.com/Aryanverma234/FoodFlow/issues)
 
 **Built with ❤️ by Aryan Verma**
 
@@ -83,12 +83,15 @@ The overall goal is to develop a practical web application while learning how fr
 | Authentication      | JWT with role-based access control                                  |
 | Language            | JavaScript                                                          |
 | Payment Integration | Razorpay and Cash on Delivery                                       |
+| Live Demo           | [food-flow-mauve.vercel.app](https://food-flow-mauve.vercel.app)    |
 | Repository          | [Aryanverma234/FoodFlow](https://github.com/Aryanverma234/FoodFlow) |
 | Development Status  | In Development                                                      |
 
 ---
 
 # 🎬 Project Showcase
+
+> 🌐 **Try it live:** [food-flow-mauve.vercel.app](https://food-flow-mauve.vercel.app) — Razorpay runs in **test mode** on the live demo, so no real payments are made.
 
 https://github.com/user-attachments/assets/18d56508-1e0e-4588-985e-d24c8b71a673
 
